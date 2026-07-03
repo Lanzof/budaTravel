@@ -61,8 +61,8 @@
 - [ ] Draw returned route as a polyline.
 
 ### Story 4.3 — API/UI contract sync
-- [ ] Verify `budapest-mini.zip` field completeness for all data used by backend and UI.
-- [ ] Document which GTFS fields may be empty and which are required for MVP.
-- [ ] Define demo origin/destination stop IDs for UI development.
-- [ ] Capture a sample `POST /api/v1/routes/search` request and response.
+- [x] Verify `budapest-mini.zip` field completeness for all data used by backend and UI.
+- [x] Document which GTFS fields may be empty and which are required for MVP.
+- [x] Define demo origin/destination stop IDs for UI development.
+- [x] Capture a sample `POST /api/v1/routes/search` request and response.
 - [ ] Decide whether route/search DTO needs extra UI fields before frontend implementation.
