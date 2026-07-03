@@ -24,11 +24,11 @@
 ## Epic 3 — Backend local development baseline
 
 ### Story 3.1 — Document local setup
-- [ ] Document JDK 21 requirement.
-- [ ] Document DB startup.
-- [ ] Document API startup.
-- [ ] Document ingestor startup.
-- [ ] Document test command.
+- [x] Document JDK 21 requirement.
+- [x] Document DB startup.
+- [x] Document API startup.
+- [x] Document ingestor startup.
+- [x] Document test command.
 
 ### Story 3.2 — Add CI
 - [ ] Add GitHub Actions workflow for `./gradlew test`.
