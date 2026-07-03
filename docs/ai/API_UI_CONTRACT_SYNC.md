@@ -81,7 +81,7 @@ Request shape:
 {
   "originStopId": "F00985",
   "destinationStopId": "F00045",
-  "departureDateTime": "2026-07-03T04:44:00+02:00",
+  "departureDateTime": "2026-01-27T04:44:00+01:00",
   "optimization": "FASTEST",
   "transportTypes": ["BUS"]
 }
@@ -89,9 +89,8 @@ Request shape:
 
 Important current limitation:
 
-- The ingestor currently maps GTFS `HH:mm:ss` times onto `LocalDate.now()` in `Europe/Budapest`.
-- For a live local demo, the `departureDateTime` date must match the date when the ingestor populated the DB.
-- This is acceptable for the immediate MVP spike, but should become a backend task before a reliable demo.
+- The ingestor maps GTFS `HH:mm:ss` times onto the service date resolved from `calendar_dates.txt` when available.
+- For `budapest-mini.zip`, the stable demo service date is `2026-01-27`.
 
 Response shape:
 
@@ -110,8 +109,8 @@ Response shape:
         "fromLon": 19.053353,
         "toLat": 47.498978,
         "toLon": 19.050884,
-        "departureTime": "2026-07-03T04:44:00+02:00",
-        "arrivalTime": "2026-07-03T04:45:00+02:00",
+        "departureTime": "2026-01-27T04:44:00+01:00",
+        "arrivalTime": "2026-01-27T04:45:00+01:00",
         "carrier": "BKK",
         "type": "BUS"
       },
@@ -124,8 +123,8 @@ Response shape:
         "fromLon": 19.050884,
         "toLat": 47.500543,
         "toLon": 19.04669,
-        "departureTime": "2026-07-03T04:45:00+02:00",
-        "arrivalTime": "2026-07-03T04:46:00+02:00",
+        "departureTime": "2026-01-27T04:45:00+01:00",
+        "arrivalTime": "2026-01-27T04:46:00+01:00",
         "carrier": "BKK",
         "type": "BUS"
       },
@@ -138,8 +137,8 @@ Response shape:
         "fromLon": 19.04669,
         "toLat": 47.498312,
         "toLon": 19.039816,
-        "departureTime": "2026-07-03T04:46:00+02:00",
-        "arrivalTime": "2026-07-03T04:48:00+02:00",
+        "departureTime": "2026-01-27T04:46:00+01:00",
+        "arrivalTime": "2026-01-27T04:48:00+01:00",
         "carrier": "BKK",
         "type": "BUS"
       },
@@ -152,8 +151,8 @@ Response shape:
         "fromLon": 19.039816,
         "toLat": 47.501307,
         "toLon": 19.036072,
-        "departureTime": "2026-07-03T04:48:00+02:00",
-        "arrivalTime": "2026-07-03T04:50:00+02:00",
+        "departureTime": "2026-01-27T04:48:00+01:00",
+        "arrivalTime": "2026-01-27T04:50:00+01:00",
         "carrier": "BKK",
         "type": "BUS"
       }
@@ -243,8 +242,8 @@ This can support a later Level 3 route visualization task.
 ## Current gaps / backend tasks
 
 1. **Date handling in ingestor**
-   - Current importer uses `LocalDate.now()` for all imported stop times.
-   - Better: derive date from GTFS `calendar_dates.txt` / `calendar.txt`, or document a stable demo date.
+   - Resolved for the current MVP: `calendar_dates.txt` is used to derive a stable GTFS service date.
+   - Future improvement: support full `calendar.txt` service ranges and per-trip service calendars.
 
 2. **Route metadata**
    - Current API response does not expose `route_short_name`, route color, trip headsign, or shape id.
@@ -269,5 +268,4 @@ This can support a later Level 3 route visualization task.
 ## Backend should next verify
 
 - imported `budapest-mini.zip` produces the documented demo route;
-- route request date issue is either fixed or made deterministic for demo;
 - CORS configuration if the web app runs on a different local port.
