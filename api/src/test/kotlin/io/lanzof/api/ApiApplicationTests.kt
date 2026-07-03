@@ -64,6 +64,25 @@ class ApiApplicationTests {
     }
 
     @Test
+    fun `CORS preflight should allow local web dev origin`() {
+        val headers = HttpHeaders().apply {
+            origin = "http://localhost:5173"
+            accessControlRequestMethod = HttpMethod.GET
+        }
+
+        val response = restTemplate.exchange(
+            "http://localhost:$port/api/v1/locations",
+            HttpMethod.OPTIONS,
+            HttpEntity(null, headers),
+            String::class.java
+        )
+
+        assertEquals(HttpStatus.OK, response.statusCode)
+        assertEquals("http://localhost:5173", response.headers.accessControlAllowOrigin)
+        assertTrue(response.headers.accessControlAllowMethods.contains(HttpMethod.GET))
+    }
+
+    @Test
     fun `GET locations without params should return data`() {
         locationRepo.saveAll(sampleStops())
 
