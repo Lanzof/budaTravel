@@ -196,6 +196,10 @@ class GtfsService(
         }
     }
 
+    // MVP/demo simplification: budapest-mini.zip contains one service_id and one active
+    // calendar_dates.txt date, so a single feed-level service date is enough for now.
+    // Full GTFS support should resolve the date per trip service_id and handle
+    // calendar.txt plus calendar_dates exception_type=1/2 semantics.
     private fun resolveServiceDate(zipFile: ZipFile): LocalDate {
         val calendarDatesEntry = zipFile.getEntry("calendar_dates.txt")
         if (calendarDatesEntry != null) {
