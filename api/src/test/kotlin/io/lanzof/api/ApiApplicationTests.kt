@@ -130,6 +130,41 @@ class ApiApplicationTests {
     }
 
     @Test
+    fun `GET locations with bbox should return stops inside bounds`() {
+        locationRepo.saveAll(sampleStops())
+
+        val response = restTemplate.exchange(
+            "http://localhost:$port/api/v1/locations?minLat=47.49&maxLat=47.51&minLon=19.10&maxLon=19.14",
+            HttpMethod.GET,
+            null,
+            LOCATION_LIST_TYPE
+        )
+
+        assertEquals(HttpStatus.OK, response.statusCode)
+        assertEquals(listOf("002133", "003002"), response.body!!.map { it.stopId })
+    }
+
+    @Test
+    fun `GET locations with partial bbox should return 400`() {
+        val response = restTemplate.getForEntity(
+            "http://localhost:$port/api/v1/locations?minLat=47.49&maxLat=47.51",
+            String::class.java
+        )
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.statusCode)
+    }
+
+    @Test
+    fun `GET locations with invalid bbox range should return 400`() {
+        val response = restTemplate.getForEntity(
+            "http://localhost:$port/api/v1/locations?minLat=48&maxLat=47&minLon=19&maxLon=20",
+            String::class.java
+        )
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.statusCode)
+    }
+
+    @Test
     fun `GET locations with both q and stopId should return 400`() {
         val response = restTemplate.getForEntity(
             "http://localhost:$port/api/v1/locations?q=puskas&stopId=003002",

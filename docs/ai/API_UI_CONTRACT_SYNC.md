@@ -14,6 +14,7 @@ It is intentionally practical: enough to let backend and frontend work in parall
 
 ```http
 GET /api/v1/locations?limit=200&offset=0
+GET /api/v1/locations?minLat=47.49&maxLat=47.51&minLon=19.02&maxLon=19.06
 ```
 
 Response item shape:
@@ -29,10 +30,9 @@ Response item shape:
 
 Notes:
 
-- Current endpoint supports `q`, `stopId`, `limit`, and `offset`.
-- It does not yet support bounding-box filtering.
+- Current endpoint supports `q`, `stopId`, `limit`, `offset`, and optional bbox parameters: `minLat`, `maxLat`, `minLon`, `maxLon`.
 - For `budapest-mini.zip`, loading all stops is fine.
-- For full data, bbox and/or clustering will likely be needed.
+- For full data, bbox is the first filter; clustering may still be needed later.
 
 ### Autocomplete stops
 
