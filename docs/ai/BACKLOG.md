@@ -66,3 +66,4 @@
 - [x] Define demo origin/destination stop IDs for UI development.
 - [x] Capture a sample `POST /api/v1/routes/search` request and response.
 - [ ] Decide whether route/search DTO needs extra UI fields before frontend implementation.
+- [x] Make GTFS demo import use a stable service date from `calendar_dates.txt`.
