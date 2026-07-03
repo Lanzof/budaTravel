@@ -1,0 +1,30 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: route-finder-db
+    environment:
+      POSTGRES_USER: route_user
+      POSTGRES_PASSWORD: route_pass
+      POSTGRES_DB: route_finder_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  app:
+    build: . # Будет использовать Dockerfile из корня проекта
+    container_name: route-finder-app
+    ports:
+      - "8080:8080" # Пробрасываем 8080 порт
+    environment:
+      # ВАЖНО: здесь db, а не localhost!
+      DB_URL: jdbc:postgresql://db:5432/route_finder_db
+      DB_USER: route_user
+      DB_PASSWORD: route_pass
+    depends_on:
+      - db # Сначала запусти базу, потом приложение
+    restart: on-failure # Если приложение упадет (например, база еще не готова), перезапустить
+
+volumes:
+  postgres_data:
