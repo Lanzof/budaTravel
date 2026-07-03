@@ -38,8 +38,8 @@
 
 ### Story 4.1 — Stops on map
 - [ ] Verify `GET /api/v1/locations` response for map markers.
-- [ ] Evaluate whether bbox filtering is needed.
-- [ ] Add bbox filtering if needed.
+- [x] Evaluate whether bbox filtering is needed.
+- [x] Add bbox filtering if needed.
 
 ### Story 4.2 — Route response for UI
 - [ ] Verify `POST /api/v1/routes/search` with mini dataset.
