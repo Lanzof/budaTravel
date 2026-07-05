@@ -1,3 +1,5 @@
+import org.springframework.boot.gradle.plugin.SpringBootPlugin
+
 plugins {
     kotlin("jvm")
 }
@@ -5,8 +7,9 @@ plugins {
 description = "common"
 
 dependencies {
-    testImplementation("com.fasterxml.jackson.core:jackson-databind:2.19.2")
-    testImplementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.19.2")
-    testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.19.2")
+    testImplementation(platform(SpringBootPlugin.BOM_COORDINATES))
+    testImplementation("com.fasterxml.jackson.core:jackson-databind")
+    testImplementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     testImplementation(kotlin("test"))
 }
