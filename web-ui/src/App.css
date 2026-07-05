@@ -1,0 +1,165 @@
+.app-shell {
+  min-height: 100vh;
+  background: #eef4ff;
+  color: #172033;
+}
+
+.hero-header {
+  padding: 32px clamp(16px, 4vw, 56px) 20px;
+}
+
+.hero-header > div {
+  max-width: 920px;
+}
+
+.hero-header h1 {
+  margin: 8px 0 12px;
+  font-size: clamp(2rem, 5vw, 4.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.06em;
+}
+
+.hero-header p {
+  max-width: 720px;
+  margin: 0;
+  color: #506078;
+  font-size: 1.05rem;
+}
+
+.eyebrow {
+  margin: 0;
+  color: #2563eb;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.map-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 20px;
+  padding: 0 clamp(16px, 4vw, 56px) 40px;
+}
+
+.map-panel,
+.sidebar {
+  border: 1px solid rgba(23, 32, 51, 0.1);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 24px 80px rgba(30, 58, 138, 0.16);
+}
+
+.map-panel {
+  min-height: 620px;
+  overflow: hidden;
+}
+
+.map {
+  width: 100%;
+  height: 620px;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 28px;
+}
+
+.sidebar h2,
+.selected-card h3 {
+  margin: 8px 0 10px;
+  color: #111827;
+}
+
+.muted {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+code {
+  border-radius: 6px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  padding: 2px 5px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 0;
+}
+
+.stats-grid div,
+.notice,
+.selected-card {
+  border: 1px solid rgba(37, 99, 235, 0.16);
+  border-radius: 18px;
+  background: #f8fbff;
+  padding: 16px;
+}
+
+.stats-grid dt {
+  color: #64748b;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.stats-grid dd {
+  margin: 6px 0 0;
+  color: #172033;
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.notice {
+  color: #475569;
+  line-height: 1.5;
+}
+
+.notice.error {
+  border-color: rgba(220, 38, 38, 0.22);
+  background: #fff1f2;
+  color: #b91c1c;
+}
+
+.selected-card p {
+  margin: 6px 0;
+  color: #475569;
+}
+
+@media (max-width: 960px) {
+  .map-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .map-panel,
+  .map {
+    min-height: 520px;
+    height: 520px;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-header {
+    padding-top: 24px;
+  }
+
+  .map-shell {
+    padding-bottom: 24px;
+  }
+
+  .map-panel,
+  .map {
+    min-height: 420px;
+    height: 420px;
+  }
+
+  .sidebar {
+    padding: 20px;
+  }
+}
