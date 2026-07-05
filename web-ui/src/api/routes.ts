@@ -30,6 +30,23 @@ export interface RouteResponseDto {
   segments: RouteSegmentDto[]
 }
 
+interface ApiErrorResponse {
+  code?: string
+  message?: string
+}
+
+export class RouteSearchError extends Error {
+  readonly status: number
+  readonly code?: string
+
+  constructor(message: string, status: number, code?: string) {
+    super(message)
+    this.name = 'RouteSearchError'
+    this.status = status
+    this.code = code
+  }
+}
+
 export async function searchRoutes(request: RouteSearchRequest): Promise<RouteResponseDto[]> {
   const response = await fetch('/api/v1/routes/search', {
     method: 'POST',
@@ -40,7 +57,18 @@ export async function searchRoutes(request: RouteSearchRequest): Promise<RouteRe
   })
 
   if (!response.ok) {
-    throw new Error(`Route search failed with HTTP ${response.status}`)
+    let apiError: ApiErrorResponse | null = null
+    try {
+      apiError = (await response.json()) as ApiErrorResponse
+    } catch {
+      apiError = null
+    }
+
+    throw new RouteSearchError(
+      apiError?.message ?? `Route search failed with HTTP ${response.status}`,
+      response.status,
+      apiError?.code,
+    )
   }
 
   return response.json() as Promise<RouteResponseDto[]>
