@@ -1,12 +1,18 @@
-# Используем легковесный образ с Java 21
+FROM eclipse-temurin:21-jdk-alpine AS build
+
+ARG MODULE
+
+WORKDIR /workspace
+COPY . .
+RUN ./gradlew :${MODULE}:bootJar --no-daemon
+
 FROM eclipse-temurin:21-jre-alpine
 
-# Рабочая директория внутри контейнера
+ARG MODULE
+
+RUN apk add --no-cache curl
+
 WORKDIR /app
+COPY --from=build /workspace/${MODULE}/build/libs/${MODULE}-0.0.1-SNAPSHOT.jar app.jar
 
-# Копируем собранный JAR-файл из папки api/build/libs
-# Мы используем подстановку *, чтобы не привязываться к номеру версии
-COPY api/build/libs/api-*.jar app.jar
-
-# Команда запуска
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]

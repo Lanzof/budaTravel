@@ -77,6 +77,14 @@
 - [x] Make API readiness depend on imported demo data.
 
 ### Story 6.2 — Dockerized local demo
-- [ ] Add Docker Compose flow for db -> ingestor -> api -> web-ui.
-- [ ] Ensure web UI waits for API readiness rather than ingestor directly.
-- [ ] Document one-command or few-command local MVP startup.
+- [x] Add Docker Compose flow for db -> ingestor -> api -> web-ui.
+- [x] Ensure web UI waits for API readiness rather than ingestor directly.
+- [x] Document one-command or few-command local MVP startup.
+
+## Epic 7 — GTFS import source cleanup
+
+### Story 7.1 — Archive source abstraction
+- [ ] Introduce a `GtfsArchiveProvider` or equivalent abstraction for GTFS archive sources.
+- [ ] Let ingestion work with Spring `Resource` or `InputStream` instead of requiring a filesystem path.
+- [ ] Support bundled demo archive, mounted local file, and future downloaded BKK archive through one flow.
+- [ ] Remove the temporary-file workaround from `DataInit` after `GtfsService` no longer requires `String zipFilePath`.
