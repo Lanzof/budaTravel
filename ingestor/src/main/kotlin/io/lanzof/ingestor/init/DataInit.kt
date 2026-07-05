@@ -51,6 +51,11 @@ class DataInit(
     }
 
     private fun copyGtfsResourceToTempFile(): java.nio.file.Path {
+        // MVP workaround: inside a Spring Boot executable jar, classpath resources are nested
+        // inside app.jar and cannot be addressed as regular filesystem paths. GtfsService
+        // currently accepts only a file path and opens ZipFile/File internally, so we copy the
+        // bundled demo archive to a temporary file first. Later, prefer a GtfsArchiveProvider
+        // or Resource/InputStream-based import flow to support classpath, mounted, and downloaded archives.
         val resource = ClassPathResource("gtfs/budapest-mini.zip")
         val tempFile = Files.createTempFile("budapest-mini-", ".zip")
         resource.inputStream.use { input ->
