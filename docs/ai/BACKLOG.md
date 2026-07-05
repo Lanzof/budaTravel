@@ -67,3 +67,16 @@
 - [x] Capture a sample `POST /api/v1/routes/search` request and response.
 - [ ] Decide whether route/search DTO needs extra UI fields before frontend implementation.
 - [x] Make GTFS demo import use a stable service date from `calendar_dates.txt`.
+
+## Epic 6 — Demo runtime orchestration
+
+### Story 6.1 — Data readiness model
+- [x] Capture ADR for data readiness and demo runtime orchestration.
+- [ ] Add import status schema for dataset import state.
+- [ ] Make ingestor write RUNNING / COMPLETED / FAILED status.
+- [ ] Make API readiness depend on imported demo data.
+
+### Story 6.2 — Dockerized local demo
+- [ ] Add Docker Compose flow for db -> ingestor -> api -> web-ui.
+- [ ] Ensure web UI waits for API readiness rather than ingestor directly.
+- [ ] Document one-command or few-command local MVP startup.
