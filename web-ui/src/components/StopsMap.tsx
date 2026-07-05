@@ -2,11 +2,23 @@ import { useEffect, useMemo, useState } from 'react'
 import { CircleMarker, MapContainer, Polyline, Popup, TileLayer, useMapEvents } from 'react-leaflet'
 import type { LatLngBounds, LatLngExpression } from 'leaflet'
 import { fetchLocations, type BoundingBox, type LocationDto } from '../api/locations'
-import { searchRoutes, type RouteResponseDto } from '../api/routes'
+import { RouteSearchError, searchRoutes, type RouteResponseDto } from '../api/routes'
 import 'leaflet/dist/leaflet.css'
 
 const BUDAPEST_CENTER: [number, number] = [47.4979, 19.0402]
 const DEMO_DEPARTURE_DATETIME = '2026-01-27T04:44:00+01:00'
+const DEMO_ORIGIN: LocationDto = {
+  stopId: 'F00985',
+  name: 'Deak Ferenc ter M',
+  lat: 47.497701,
+  lon: 19.053353,
+}
+const DEMO_DESTINATION: LocationDto = {
+  stopId: 'F00045',
+  name: 'Donati utca',
+  lat: 47.501307,
+  lon: 19.036072,
+}
 
 const DEFAULT_BOUNDS: BoundingBox = {
   minLat: 47.45,
@@ -58,6 +70,18 @@ function routeToPolyline(route: RouteResponseDto | null): LatLngExpression[] {
 
 function formatDuration(duration: string): string {
   return duration.replace('PT', '').replace('H', 'h ').replace('M', 'm').replace('S', 's')
+}
+
+function toRouteErrorMessage(error: unknown): string {
+  if (error instanceof RouteSearchError && error.status === 422) {
+    return 'Route not found in the bundled mini demo dataset. Try the demo route: Deak Ferenc ter M → Donati utca.'
+  }
+
+  if (error instanceof RouteSearchError) {
+    return error.message
+  }
+
+  return error instanceof Error ? error.message : 'Unknown route search error'
 }
 
 export function StopsMap() {
@@ -129,7 +153,7 @@ export function StopsMap() {
         setRouteError('No routes returned by backend.')
       }
     } catch (nextError) {
-      setRouteError(nextError instanceof Error ? nextError.message : 'Unknown route search error')
+      setRouteError(toRouteErrorMessage(nextError))
     } finally {
       setIsSearchingRoute(false)
     }
@@ -143,6 +167,14 @@ export function StopsMap() {
 
   function markAsDestination(location: LocationDto): void {
     setDestination(location)
+    setRoute(null)
+    setRouteError(null)
+  }
+
+  function useDemoRoute(): void {
+    setOrigin(DEMO_ORIGIN)
+    setDestination(DEMO_DESTINATION)
+    setSelectedStopId(DEMO_ORIGIN.stopId)
     setRoute(null)
     setRouteError(null)
   }
@@ -243,7 +275,12 @@ export function StopsMap() {
             <span>Destination</span>
             <strong>{destination?.name ?? 'Not selected'}</strong>
           </div>
-          <p className="route-hint">Uses the demo GTFS service date: <code>2026-01-27 04:44 Europe/Budapest</code>.</p>
+          <p className="route-hint">
+            Uses the demo GTFS service date: <code>2026-01-27 04:44 Europe/Budapest</code>.
+          </p>
+          <button type="button" className="secondary-action" onClick={useDemoRoute}>
+            Use demo route
+          </button>
           <button type="button" className="primary-action" disabled={!canSearchRoute || isSearchingRoute} onClick={handleRouteSearch}>
             {isSearchingRoute ? 'Searching…' : 'Search fastest bus route'}
           </button>
