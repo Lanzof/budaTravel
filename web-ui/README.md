@@ -34,4 +34,10 @@ The UI requests stops from:
 GET /api/v1/locations?minLat=...&maxLat=...&minLon=...&maxLon=...&limit=200
 ```
 
+It can also search the fastest bus route between two selected stops. For the current demo data, route search uses the stable GTFS service timestamp `2026-01-27T04:44:00+01:00`:
+
+```text
+POST /api/v1/routes/search
+```
+
 During local development, Vite proxies `/api` requests to `http://localhost:8080`.
