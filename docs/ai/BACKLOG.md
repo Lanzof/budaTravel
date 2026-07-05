@@ -77,6 +77,6 @@
 - [x] Make API readiness depend on imported demo data.
 
 ### Story 6.2 — Dockerized local demo
-- [ ] Add Docker Compose flow for db -> ingestor -> api -> web-ui.
-- [ ] Ensure web UI waits for API readiness rather than ingestor directly.
-- [ ] Document one-command or few-command local MVP startup.
+- [x] Add Docker Compose flow for db -> ingestor -> api -> web-ui.
+- [x] Ensure web UI waits for API readiness rather than ingestor directly.
+- [x] Document one-command or few-command local MVP startup.

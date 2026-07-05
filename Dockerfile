@@ -1,12 +1,10 @@
-# Используем легковесный образ с Java 21
 FROM eclipse-temurin:21-jre-alpine
 
-# Рабочая директория внутри контейнера
+ARG JAR_FILE
+
+RUN apk add --no-cache curl
+
 WORKDIR /app
+COPY ${JAR_FILE} app.jar
 
-# Копируем собранный JAR-файл из папки api/build/libs
-# Мы используем подстановку *, чтобы не привязываться к номеру версии
-COPY api/build/libs/api-*.jar app.jar
-
-# Команда запуска
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
