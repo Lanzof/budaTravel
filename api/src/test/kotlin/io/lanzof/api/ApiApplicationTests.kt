@@ -1,10 +1,13 @@
 package io.lanzof.api
 
 import io.lanzof.api.dto.ApiErrorResponse
+import io.lanzof.api.dto.ReadinessResponse
 import io.lanzof.core.entity.Connection
 import io.lanzof.core.entity.Location
 import io.lanzof.core.repo.ConnectionRepo
 import io.lanzof.core.repo.LocationRepo
+import io.lanzof.core.repo.ImportStatusRepo
+import io.lanzof.core.service.ImportStatusService
 import io.lanzof.dto.LocationDto
 import io.lanzof.dto.LocationSuggestionDto
 import io.lanzof.dto.RouteOptimization
@@ -44,11 +47,18 @@ class ApiApplicationTests {
     @Autowired
     private lateinit var connectionRepo: ConnectionRepo
 
+    @Autowired
+    private lateinit var importStatusRepo: ImportStatusRepo
+
+    @Autowired
+    private lateinit var importStatusService: ImportStatusService
+
     @LocalServerPort
     private var port: Int = 0
 
     @BeforeEach
     fun setUp() {
+        importStatusRepo.deleteAll()
         connectionRepo.deleteAll()
         locationRepo.deleteAll()
     }
@@ -61,6 +71,58 @@ class ApiApplicationTests {
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals("API is running", response.body)
+    }
+
+    @Test
+    fun `readiness endpoint should return 503 before demo data import is complete`() {
+        val response = restTemplate.getForEntity(
+            "http://localhost:$port/api/v1/readiness",
+            ReadinessResponse::class.java,
+        )
+
+        assertEquals(HttpStatus.SERVICE_UNAVAILABLE, response.statusCode)
+        assertEquals(false, response.body!!.ready)
+        assertEquals(ImportStatusService.DEMO_DATASET_NAME, response.body!!.datasetName)
+        assertEquals(0, response.body!!.locationsCount)
+        assertEquals(0, response.body!!.connectionsCount)
+    }
+
+    @Test
+    fun `readiness endpoint should return 200 after demo data import is complete`() {
+        val a = locationRepo.save(Location(stopId = "A", name = "Stop A", lat = 47.0, lon = 19.0))
+        val b = locationRepo.save(Location(stopId = "B", name = "Stop B", lat = 47.1, lon = 19.1))
+        connectionRepo.save(conn(a, b, "2026-01-26T08:00:00+01:00", "2026-01-26T08:15:00+01:00", "0.0"))
+        importStatusService.markCompleted()
+
+        val response = restTemplate.getForEntity(
+            "http://localhost:$port/api/v1/readiness",
+            ReadinessResponse::class.java,
+        )
+
+        assertEquals(HttpStatus.OK, response.statusCode)
+        assertEquals(true, response.body!!.ready)
+        assertEquals("COMPLETED", response.body!!.status!!.name)
+        assertEquals(2, response.body!!.locationsCount)
+        assertEquals(1, response.body!!.connectionsCount)
+    }
+
+    @Test
+    fun `CORS preflight should allow local web dev origin`() {
+        val headers = HttpHeaders().apply {
+            origin = "http://localhost:5173"
+            accessControlRequestMethod = HttpMethod.GET
+        }
+
+        val response = restTemplate.exchange(
+            "http://localhost:$port/api/v1/locations",
+            HttpMethod.OPTIONS,
+            HttpEntity(null, headers),
+            String::class.java
+        )
+
+        assertEquals(HttpStatus.OK, response.statusCode)
+        assertEquals("http://localhost:5173", response.headers.accessControlAllowOrigin)
+        assertTrue(response.headers.accessControlAllowMethods.contains(HttpMethod.GET))
     }
 
     @Test
@@ -108,6 +170,41 @@ class ApiApplicationTests {
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(1, response.body!!.size)
         assertEquals("002138", response.body!![0].stopId)
+    }
+
+    @Test
+    fun `GET locations with bbox should return stops inside bounds`() {
+        locationRepo.saveAll(sampleStops())
+
+        val response = restTemplate.exchange(
+            "http://localhost:$port/api/v1/locations?minLat=47.49&maxLat=47.51&minLon=19.10&maxLon=19.14",
+            HttpMethod.GET,
+            null,
+            LOCATION_LIST_TYPE
+        )
+
+        assertEquals(HttpStatus.OK, response.statusCode)
+        assertEquals(listOf("002133", "003002"), response.body!!.map { it.stopId })
+    }
+
+    @Test
+    fun `GET locations with partial bbox should return 400`() {
+        val response = restTemplate.getForEntity(
+            "http://localhost:$port/api/v1/locations?minLat=47.49&maxLat=47.51",
+            String::class.java
+        )
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.statusCode)
+    }
+
+    @Test
+    fun `GET locations with invalid bbox range should return 400`() {
+        val response = restTemplate.getForEntity(
+            "http://localhost:$port/api/v1/locations?minLat=48&maxLat=47&minLon=19&maxLon=20",
+            String::class.java
+        )
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.statusCode)
     }
 
     @Test

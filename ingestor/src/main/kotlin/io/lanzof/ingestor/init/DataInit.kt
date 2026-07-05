@@ -1,40 +1,72 @@
 package io.lanzof.ingestor.init
 
-import io.lanzof.core.repo.ConnectionRepo
-import io.lanzof.core.repo.LocationRepo
+import io.lanzof.core.service.ImportStatusService
+import io.lanzof.ingestor.service.GtfsService
 import org.slf4j.LoggerFactory
 import org.springframework.boot.CommandLineRunner
-import org.springframework.stereotype.Component
-import io.lanzof.ingestor.service.GtfsService
 import org.springframework.core.io.ClassPathResource
+import org.springframework.stereotype.Component
+import java.nio.file.Files
 
 @Component
 class DataInit(
-    private val locationRepo: LocationRepo,
-    private val connectionRepo: ConnectionRepo,
-    private val gtfsService: GtfsService
-): CommandLineRunner {
+    private val gtfsService: GtfsService,
+    private val importStatusService: ImportStatusService,
+) : CommandLineRunner {
 
     private val logger = LoggerFactory.getLogger(DataInit::class.java)
 
     override fun run(vararg args: String?) {
-        logger.info("Starting GTFS Import...")
+        val currentReadiness = importStatusService.getReadiness()
+        if (currentReadiness.ready) {
+            logger.info(
+                "Skipping GTFS import: dataset={} is already ready, locations={}, connections={}",
+                currentReadiness.datasetName,
+                currentReadiness.locationsCount,
+                currentReadiness.connectionsCount,
+            )
+            return
+        }
 
-        // Пропустим очистку БД, если не хочешь терять данные при каждом запуске,
-        // но для тестов лучше оставить.
-        locationRepo.deleteAll()
-        connectionRepo.deleteAll()
+        logger.info("Starting GTFS import for {}...", ImportStatusService.DEMO_DATASET_NAME)
+        importStatusService.markRunning()
 
         try {
-            // Укажи путь к твоему первому архиву
-            // Лучше использовать абсолютный путь или положить файлы в resources
-            val zip = ClassPathResource("gtfs/budapest-mini.zip")
-            gtfsService.importStopsFromZip(zip.file.absolutePath)
+            val zipPath = copyGtfsResourceToTempFile()
+            gtfsService.importStopsFromZip(zipPath.toString())
+            gtfsService.importStopTimesFromZip(zipPath.toString(), "BKK")
 
-            // 2. Импорт расписания
-            gtfsService.importStopTimesFromZip(zip.file.absolutePath, "BKK")
+            val completed = importStatusService.markCompleted()
+            logger.info(
+                "GTFS import completed: dataset={}, locations={}, connections={}",
+                completed.datasetName,
+                completed.locationsCount,
+                completed.connectionsCount,
+            )
         } catch (e: Exception) {
-            logger.error("Import failed", e)
+            importStatusService.markFailed(error = e)
+            logger.error("GTFS import failed", e)
+            throw e
         }
+    }
+
+    /**
+     * MVP workaround for running the ingestor from a Spring Boot executable jar.
+     *
+     * Inside `app.jar`, classpath resources are nested and cannot be addressed as regular
+     * filesystem paths. `GtfsService` currently accepts only a file path and opens `ZipFile` /
+     * `File` internally, so the bundled demo archive is copied to a temporary file first.
+     *
+     * Later, prefer a `GtfsArchiveProvider` or `Resource` / `InputStream` based import flow to
+     * support classpath, mounted, and downloaded archives without this adapter.
+     */
+    private fun copyGtfsResourceToTempFile(): java.nio.file.Path {
+        val resource = ClassPathResource("gtfs/budapest-mini.zip")
+        val tempFile = Files.createTempFile("budapest-mini-", ".zip")
+        resource.inputStream.use { input ->
+            Files.copy(input, tempFile, java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+        }
+        tempFile.toFile().deleteOnExit()
+        return tempFile
     }
 }

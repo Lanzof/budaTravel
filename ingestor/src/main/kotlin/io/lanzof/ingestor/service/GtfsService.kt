@@ -34,7 +34,7 @@ class GtfsService(
         findAndRegisterModules()
         disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
     }
-    private val gtfsTimeFormatter = DateTimeFormatter.ofPattern("H:mm:ss")
+    private val gtfsDateFormatter = DateTimeFormatter.BASIC_ISO_DATE
 
     fun importStopsFromZip(zipFilePath: String) {
         logger.info("Starting import from: $zipFilePath")
@@ -107,6 +107,8 @@ class GtfsService(
                     logger.error("stop_times.txt not found")
                     return
                 }
+            val serviceDate = resolveServiceDate(zipFile)
+            logger.info("Resolved GTFS service date: $serviceDate")
 
             // Оптимизация: загружаем все локации в Map ОДИН раз, чтобы не делать N+1 запросов в цикле
             val locationMap = locationRepo.findAll()
@@ -130,7 +132,7 @@ class GtfsService(
                     // Если ID поездки сменился, обрабатываем накопленный буфер
                     if (stopTime.trip_id != currentTripId) {
                         if (tripBuffer.isNotEmpty()) {
-                            processTrip(tripBuffer, carrierName, locationMap, connectionsToSave)
+                            processTrip(tripBuffer, carrierName, serviceDate, locationMap, connectionsToSave)
                             tripBuffer.clear()
 
                             tripsProcessed++
@@ -148,7 +150,7 @@ class GtfsService(
 
             // Обрабатываем последнюю поездку в файле
             if (tripBuffer.isNotEmpty()) {
-                processTrip(tripBuffer, carrierName, locationMap, connectionsToSave)
+                processTrip(tripBuffer, carrierName, serviceDate, locationMap, connectionsToSave)
             }
 
             // Сохраняем оставшийся батч
@@ -163,6 +165,7 @@ class GtfsService(
     private fun processTrip(
         stops: List<GtfsStopTime>,
         carrier: String,
+        serviceDate: LocalDate,
         locationMap: Map<String, Location>, // Передаем карту вместо репозитория
         buffer: MutableList<Connection>
     ) {
@@ -182,8 +185,8 @@ class GtfsService(
                 val conn = Connection(
                     fromLocation = fromLoc,
                     toLocation = toLoc,
-                    departureTime = parseGtfsTime(from.departure_time),
-                    arrivalTime = parseGtfsTime(to.arrival_time),
+                    departureTime = parseGtfsTime(from.departure_time, serviceDate),
+                    arrivalTime = parseGtfsTime(to.arrival_time, serviceDate),
                     price = BigDecimal.ZERO, // В GTFS цен нет
                     carrier = carrier,
                     type = "PUBLIC_TRANSPORT"
@@ -193,7 +196,46 @@ class GtfsService(
         }
     }
 
-    private fun parseGtfsTime(timeStr: String): OffsetDateTime {
+    // MVP/demo simplification: budapest-mini.zip contains one service_id and one active
+    // calendar_dates.txt date, so a single feed-level service date is enough for now.
+    // Full GTFS support should resolve the date per trip service_id and handle
+    // calendar.txt plus calendar_dates exception_type=1/2 semantics.
+    private fun resolveServiceDate(zipFile: ZipFile): LocalDate {
+        val calendarDatesEntry = zipFile.getEntry("calendar_dates.txt")
+        if (calendarDatesEntry != null) {
+            zipFile.getInputStream(calendarDatesEntry).bufferedReader().useLines { lines ->
+                lines.drop(1).forEach { line ->
+                    val fields = line.split(',')
+                    if (fields.size >= 2 && fields[1].isNotBlank()) {
+                        return LocalDate.parse(fields[1].trim(), gtfsDateFormatter)
+                    }
+                }
+            }
+        }
+
+        val feedInfoEntry = zipFile.getEntry("feed_info.txt")
+        if (feedInfoEntry != null) {
+            zipFile.getInputStream(feedInfoEntry).bufferedReader().useLines { lines ->
+                val iterator = lines.iterator()
+                if (iterator.hasNext()) {
+                    val header = iterator.next().split(',')
+                    val startDateIndex = header.indexOf("feed_start_date")
+                    if (startDateIndex >= 0 && iterator.hasNext()) {
+                        val values = iterator.next().split(',')
+                        val feedStartDate = values.getOrNull(startDateIndex)?.trim()
+                        if (!feedStartDate.isNullOrBlank()) {
+                            return LocalDate.parse(feedStartDate, gtfsDateFormatter)
+                        }
+                    }
+                }
+            }
+        }
+
+        logger.warn("GTFS service date not found in calendar_dates.txt or feed_info.txt; falling back to current date")
+        return LocalDate.now(ZoneId.of("Europe/Budapest"))
+    }
+
+    private fun parseGtfsTime(timeStr: String, serviceDate: LocalDate): OffsetDateTime {
         val parts = timeStr.split(":")
         var hours = parts[0].toInt()
         val minutes = parts[1].toInt()
@@ -203,7 +245,7 @@ class GtfsService(
         hours %= 24
 
         val time = LocalTime.of(hours, minutes, seconds)
-        return LocalDate.now()
+        return serviceDate
             .atTime(time)
             .atZone(ZoneId.of("Europe/Budapest"))
             .toOffsetDateTime()

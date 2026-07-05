@@ -24,11 +24,11 @@
 ## Epic 3 — Backend local development baseline
 
 ### Story 3.1 — Document local setup
-- [ ] Document JDK 21 requirement.
-- [ ] Document DB startup.
-- [ ] Document API startup.
-- [ ] Document ingestor startup.
-- [ ] Document test command.
+- [x] Document JDK 21 requirement.
+- [x] Document DB startup.
+- [x] Document API startup.
+- [x] Document ingestor startup.
+- [x] Document test command.
 
 ### Story 3.2 — Add CI
 - [ ] Add GitHub Actions workflow for `./gradlew test`.
@@ -38,8 +38,8 @@
 
 ### Story 4.1 — Stops on map
 - [ ] Verify `GET /api/v1/locations` response for map markers.
-- [ ] Evaluate whether bbox filtering is needed.
-- [ ] Add bbox filtering if needed.
+- [x] Evaluate whether bbox filtering is needed.
+- [x] Add bbox filtering if needed.
 
 ### Story 4.2 — Route response for UI
 - [ ] Verify `POST /api/v1/routes/search` with mini dataset.
@@ -59,3 +59,32 @@
 - [ ] Select origin and destination.
 - [ ] Call route search.
 - [ ] Draw returned route as a polyline.
+
+### Story 4.3 — API/UI contract sync
+- [x] Verify `budapest-mini.zip` field completeness for all data used by backend and UI.
+- [x] Document which GTFS fields may be empty and which are required for MVP.
+- [x] Define demo origin/destination stop IDs for UI development.
+- [x] Capture a sample `POST /api/v1/routes/search` request and response.
+- [ ] Decide whether route/search DTO needs extra UI fields before frontend implementation.
+- [x] Make GTFS demo import use a stable service date from `calendar_dates.txt`.
+
+## Epic 6 — Demo runtime orchestration
+
+### Story 6.1 — Data readiness model
+- [x] Capture ADR for data readiness and demo runtime orchestration.
+- [x] Add import status schema for dataset import state.
+- [x] Make ingestor write RUNNING / COMPLETED / FAILED status.
+- [x] Make API readiness depend on imported demo data.
+
+### Story 6.2 — Dockerized local demo
+- [x] Add Docker Compose flow for db -> ingestor -> api -> web-ui.
+- [x] Ensure web UI waits for API readiness rather than ingestor directly.
+- [x] Document one-command or few-command local MVP startup.
+
+## Epic 7 — GTFS import source cleanup
+
+### Story 7.1 — Archive source abstraction
+- [ ] Introduce a `GtfsArchiveProvider` or equivalent abstraction for GTFS archive sources.
+- [ ] Let ingestion work with Spring `Resource` or `InputStream` instead of requiring a filesystem path.
+- [ ] Support bundled demo archive, mounted local file, and future downloaded BKK archive through one flow.
+- [ ] Remove the temporary-file workaround from `DataInit` after `GtfsService` no longer requires `String zipFilePath`.
