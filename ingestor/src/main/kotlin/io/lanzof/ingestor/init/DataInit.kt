@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.boot.CommandLineRunner
 import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Component
+import java.nio.file.Files
 
 @Component
 class DataInit(
@@ -31,9 +32,9 @@ class DataInit(
         importStatusService.markRunning()
 
         try {
-            val zip = ClassPathResource("gtfs/budapest-mini.zip")
-            gtfsService.importStopsFromZip(zip.file.absolutePath)
-            gtfsService.importStopTimesFromZip(zip.file.absolutePath, "BKK")
+            val zipPath = copyGtfsResourceToTempFile()
+            gtfsService.importStopsFromZip(zipPath.toString())
+            gtfsService.importStopTimesFromZip(zipPath.toString(), "BKK")
 
             val completed = importStatusService.markCompleted()
             logger.info(
@@ -47,5 +48,15 @@ class DataInit(
             logger.error("GTFS import failed", e)
             throw e
         }
+    }
+
+    private fun copyGtfsResourceToTempFile(): java.nio.file.Path {
+        val resource = ClassPathResource("gtfs/budapest-mini.zip")
+        val tempFile = Files.createTempFile("budapest-mini-", ".zip")
+        resource.inputStream.use { input ->
+            Files.copy(input, tempFile, java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+        }
+        tempFile.toFile().deleteOnExit()
+        return tempFile
     }
 }
