@@ -76,3 +76,10 @@ Useful cleanup command:
 ```bash
 docker compose down -v
 ```
+
+If Flyway reports a non-empty schema without `flyway_schema_history`, the local Docker volume was probably created by an older experimental run. Reset the local demo database with:
+
+```bash
+docker compose down -v
+docker compose up --build
+```
