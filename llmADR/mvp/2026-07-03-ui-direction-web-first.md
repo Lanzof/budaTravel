@@ -17,7 +17,7 @@ Build the first MVP UI as a web app in this repository.
 Suggested structure:
 
 ```text
-web/
+web-ui/
 ```
 
 The web UI should consume the backend HTTP API and provide the first end-to-end demo.
@@ -71,7 +71,7 @@ Backend track:
 
 Frontend track:
 
-- map skeleton;
+- map skeleton using React + Vite + TypeScript + Leaflet;
 - mocked API fixtures first if backend work is not ready;
 - stop marker rendering;
 - route polyline rendering.
@@ -79,7 +79,7 @@ Frontend track:
 ## Acceptance criteria
 
 - The repository contains a documented web-first decision.
-- Future frontend work starts under `web/` unless superseded by a later ADR.
+- Future frontend work starts under `web-ui/` unless superseded by a later ADR.
 - Android is explicitly deferred, not abandoned.
 
 ## Result
