@@ -1,0 +1,36 @@
+name: Frontend CI
+
+on:
+  push:
+    branches: [master, ai-features]
+  pull_request:
+    branches: [master, ai-features]
+
+jobs:
+  frontend:
+    name: Web UI lint and build
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: web-ui
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web-ui/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
