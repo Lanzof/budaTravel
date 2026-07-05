@@ -269,3 +269,38 @@ This can support a later Level 3 route visualization task.
 
 - imported `budapest-mini.zip` produces the documented demo route;
 - CORS configuration if the web app runs on a different local port.
+
+## Runtime readiness endpoint
+
+The API exposes a readiness endpoint that reports whether the demo dataset is imported and usable by the UI.
+
+```http
+GET /api/v1/readiness
+```
+
+Ready response:
+
+```http
+200 OK
+```
+
+```json
+{
+  "datasetName": "budapest-mini",
+  "ready": true,
+  "status": "COMPLETED",
+  "startedAt": "2026-07-05T18:00:00+04:00",
+  "completedAt": "2026-07-05T18:01:00+04:00",
+  "locationsCount": 25,
+  "connectionsCount": 24,
+  "errorMessage": null
+}
+```
+
+Not-ready response:
+
+```http
+503 Service Unavailable
+```
+
+The UI can use this endpoint later to distinguish "API process is alive" from "demo data is ready for map/route usage".

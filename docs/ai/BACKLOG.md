@@ -72,9 +72,9 @@
 
 ### Story 6.1 — Data readiness model
 - [x] Capture ADR for data readiness and demo runtime orchestration.
-- [ ] Add import status schema for dataset import state.
-- [ ] Make ingestor write RUNNING / COMPLETED / FAILED status.
-- [ ] Make API readiness depend on imported demo data.
+- [x] Add import status schema for dataset import state.
+- [x] Make ingestor write RUNNING / COMPLETED / FAILED status.
+- [x] Make API readiness depend on imported demo data.
 
 ### Story 6.2 — Dockerized local demo
 - [ ] Add Docker Compose flow for db -> ingestor -> api -> web-ui.

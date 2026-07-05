@@ -1,10 +1,13 @@
 package io.lanzof.api
 
 import io.lanzof.api.dto.ApiErrorResponse
+import io.lanzof.api.dto.ReadinessResponse
 import io.lanzof.core.entity.Connection
 import io.lanzof.core.entity.Location
 import io.lanzof.core.repo.ConnectionRepo
 import io.lanzof.core.repo.LocationRepo
+import io.lanzof.core.repo.ImportStatusRepo
+import io.lanzof.core.service.ImportStatusService
 import io.lanzof.dto.LocationDto
 import io.lanzof.dto.LocationSuggestionDto
 import io.lanzof.dto.RouteOptimization
@@ -44,11 +47,18 @@ class ApiApplicationTests {
     @Autowired
     private lateinit var connectionRepo: ConnectionRepo
 
+    @Autowired
+    private lateinit var importStatusRepo: ImportStatusRepo
+
+    @Autowired
+    private lateinit var importStatusService: ImportStatusService
+
     @LocalServerPort
     private var port: Int = 0
 
     @BeforeEach
     fun setUp() {
+        importStatusRepo.deleteAll()
         connectionRepo.deleteAll()
         locationRepo.deleteAll()
     }
@@ -61,6 +71,39 @@ class ApiApplicationTests {
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals("API is running", response.body)
+    }
+
+    @Test
+    fun `readiness endpoint should return 503 before demo data import is complete`() {
+        val response = restTemplate.getForEntity(
+            "http://localhost:$port/api/v1/readiness",
+            ReadinessResponse::class.java,
+        )
+
+        assertEquals(HttpStatus.SERVICE_UNAVAILABLE, response.statusCode)
+        assertEquals(false, response.body!!.ready)
+        assertEquals(ImportStatusService.DEMO_DATASET_NAME, response.body!!.datasetName)
+        assertEquals(0, response.body!!.locationsCount)
+        assertEquals(0, response.body!!.connectionsCount)
+    }
+
+    @Test
+    fun `readiness endpoint should return 200 after demo data import is complete`() {
+        val a = locationRepo.save(Location(stopId = "A", name = "Stop A", lat = 47.0, lon = 19.0))
+        val b = locationRepo.save(Location(stopId = "B", name = "Stop B", lat = 47.1, lon = 19.1))
+        connectionRepo.save(conn(a, b, "2026-01-26T08:00:00+01:00", "2026-01-26T08:15:00+01:00", "0.0"))
+        importStatusService.markCompleted()
+
+        val response = restTemplate.getForEntity(
+            "http://localhost:$port/api/v1/readiness",
+            ReadinessResponse::class.java,
+        )
+
+        assertEquals(HttpStatus.OK, response.statusCode)
+        assertEquals(true, response.body!!.ready)
+        assertEquals("COMPLETED", response.body!!.status!!.name)
+        assertEquals(2, response.body!!.locationsCount)
+        assertEquals(1, response.body!!.connectionsCount)
     }
 
     @Test

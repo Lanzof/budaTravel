@@ -1,40 +1,51 @@
 package io.lanzof.ingestor.init
 
-import io.lanzof.core.repo.ConnectionRepo
-import io.lanzof.core.repo.LocationRepo
+import io.lanzof.core.service.ImportStatusService
+import io.lanzof.ingestor.service.GtfsService
 import org.slf4j.LoggerFactory
 import org.springframework.boot.CommandLineRunner
-import org.springframework.stereotype.Component
-import io.lanzof.ingestor.service.GtfsService
 import org.springframework.core.io.ClassPathResource
+import org.springframework.stereotype.Component
 
 @Component
 class DataInit(
-    private val locationRepo: LocationRepo,
-    private val connectionRepo: ConnectionRepo,
-    private val gtfsService: GtfsService
-): CommandLineRunner {
+    private val gtfsService: GtfsService,
+    private val importStatusService: ImportStatusService,
+) : CommandLineRunner {
 
     private val logger = LoggerFactory.getLogger(DataInit::class.java)
 
     override fun run(vararg args: String?) {
-        logger.info("Starting GTFS Import...")
+        val currentReadiness = importStatusService.getReadiness()
+        if (currentReadiness.ready) {
+            logger.info(
+                "Skipping GTFS import: dataset={} is already ready, locations={}, connections={}",
+                currentReadiness.datasetName,
+                currentReadiness.locationsCount,
+                currentReadiness.connectionsCount,
+            )
+            return
+        }
 
-        // Пропустим очистку БД, если не хочешь терять данные при каждом запуске,
-        // но для тестов лучше оставить.
-        locationRepo.deleteAll()
-        connectionRepo.deleteAll()
+        logger.info("Starting GTFS import for {}...", ImportStatusService.DEMO_DATASET_NAME)
+        importStatusService.markRunning()
 
         try {
-            // Укажи путь к твоему первому архиву
-            // Лучше использовать абсолютный путь или положить файлы в resources
             val zip = ClassPathResource("gtfs/budapest-mini.zip")
             gtfsService.importStopsFromZip(zip.file.absolutePath)
-
-            // 2. Импорт расписания
             gtfsService.importStopTimesFromZip(zip.file.absolutePath, "BKK")
+
+            val completed = importStatusService.markCompleted()
+            logger.info(
+                "GTFS import completed: dataset={}, locations={}, connections={}",
+                completed.datasetName,
+                completed.locationsCount,
+                completed.connectionsCount,
+            )
         } catch (e: Exception) {
-            logger.error("Import failed", e)
+            importStatusService.markFailed(error = e)
+            logger.error("GTFS import failed", e)
+            throw e
         }
     }
 }
