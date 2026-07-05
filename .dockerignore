@@ -1,11 +1,5 @@
 .git
 .gradle
+**/build
 web-ui/node_modules
 web-ui/dist
-**/build/*
-!api/build/
-!api/build/libs/
-!api/build/libs/api-0.0.1-SNAPSHOT.jar
-!ingestor/build/
-!ingestor/build/libs/
-!ingestor/build/libs/ingestor-0.0.1-SNAPSHOT.jar

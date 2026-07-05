@@ -48,13 +48,7 @@ npm run build
 
 ## Local Docker demo
 
-Build runnable backend jars first:
-
-```bash
-./gradlew :api:bootJar :ingestor:bootJar
-```
-
-Then start the demo stack:
+Start the demo stack:
 
 ```bash
 docker compose up --build
