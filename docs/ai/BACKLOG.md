@@ -88,3 +88,43 @@
 - [ ] Let ingestion work with Spring `Resource` or `InputStream` instead of requiring a filesystem path.
 - [ ] Support bundled demo archive, mounted local file, and future downloaded BKK archive through one flow.
 - [ ] Remove the temporary-file workaround from `DataInit` after `GtfsService` no longer requires `String zipFilePath`.
+
+
+## Epic 8 — MVP+ usable route demo
+
+### Story 8.1 — Shape-based route geometry
+- [x] Verify that real GTFS archives and mini dataset contain populated `shapes.txt`.
+- [ ] Import GTFS shape points from `shapes.txt`.
+- [ ] Preserve `trip_id -> shape_id` from `trips.txt`.
+- [ ] Resolve shape geometry for the known demo route.
+- [ ] Extend route API response with optional geometry points.
+- [ ] Render shape-based geometry in web UI when available.
+- [ ] Keep stop-to-stop polyline as fallback.
+
+### Story 8.2 — Better route selection UX
+- [ ] Add stop search/autocomplete to choose origin and destination.
+- [ ] Support selecting stops from the map.
+- [ ] Keep the demo route button as a regression/sanity shortcut.
+- [ ] Show route details in a readable way, not only a line on the map.
+
+### Story 8.3 — BKK API/data source research
+- [ ] Determine whether BKK API returns full archives or incremental data.
+- [ ] Check archive size, update frequency, and required auth.
+- [ ] Check whether BKK responses provide `ETag`, `Last-Modified`, checksum, timestamp, or version metadata.
+- [ ] Document download-cache and import-if-changed strategy.
+- [ ] Decide how API keys are provided locally and in CI/deploy environments.
+
+### Story 8.4 — Ingestor profiles and source abstraction
+- [ ] Add `budatravel.gtfs.source` configuration: demo / local-file / bkk-remote.
+- [ ] Add Spring profile defaults for demo and future BKK import.
+- [ ] Introduce `GtfsArchiveProvider` or equivalent.
+- [ ] Implement bundled demo archive provider.
+- [ ] Implement local file archive provider.
+- [ ] Design BKK remote provider with cache/import-if-changed behavior.
+- [ ] Implement scheduled import only after the BKK data source research is complete.
+
+### Story 8.5 — E2E and demo quality
+- [ ] Add Docker Compose smoke test for demo stack startup.
+- [ ] Add route API smoke check for the known demo route.
+- [ ] Add browser E2E later: open UI, click demo route, verify route line.
+- [ ] Add screenshots/GIF and one-command demo documentation.
