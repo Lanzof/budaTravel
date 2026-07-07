@@ -255,3 +255,39 @@ Second PR:
 Third PR:
 
 > Add minimal web UI map prototype.
+
+
+## MVP+ / Usable Route Demo
+
+The first technical MVP is complete: the local stack can import demo GTFS data, expose API endpoints, and render stops plus a demo route in the web UI.
+
+The next phase is **MVP+ / Usable Route Demo**. Its goal is to make the demo route flow more meaningful without slowing down local development.
+
+Priorities:
+
+1. **Shape-based route geometry**
+   - Use GTFS `shapes.txt` and `trips.shape_id`.
+   - Draw route geometry from real GTFS shape points where available.
+   - Fall back to stop-to-stop polyline when shape data cannot be resolved.
+
+2. **Better route selection UX**
+   - Search/select origin and destination stops.
+   - Keep the demo route button for quick checks.
+   - Show readable route details and errors.
+
+3. **BKK API/data source research**
+   - Research whether BKK API returns full archives or incremental data.
+   - Check cache/version metadata such as `ETag` or `Last-Modified`.
+   - Design import-if-changed before implementing scheduled import.
+
+4. **Ingestor profiles and source abstraction**
+   - Demo profile uses bundled mini GTFS data.
+   - Local-file source can ingest a manually provided archive.
+   - BKK remote source is added after API research.
+   - Scheduled import is implemented later on top of the remote source.
+   - Avoid making every local development run download and ingest large archives.
+
+See `llmADR/mvp-plus/2026-07-08-route-geometry-and-bkk-import-plan.md`.
+
+
+Detailed task tree: `docs/ai/MVP_PLUS_TASK_TREE.md`.
