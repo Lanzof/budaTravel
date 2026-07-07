@@ -287,7 +287,7 @@ Priorities:
    - Scheduled import is implemented later on top of the remote source.
    - Avoid making every local development run download and ingest large archives.
 
-See `llmADR/mvp/2026-07-08-mvp-plus-route-geometry-and-bkk-import-plan.md`.
+See `llmADR/mvp-plus/2026-07-08-route-geometry-and-bkk-import-plan.md`.
 
 
 Detailed task tree: `docs/ai/MVP_PLUS_TASK_TREE.md`.
