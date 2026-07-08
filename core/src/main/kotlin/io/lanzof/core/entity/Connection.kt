@@ -1,5 +1,6 @@
 package io.lanzof.core.entity
 
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
@@ -32,5 +33,26 @@ data class Connection(
 
     val price: BigDecimal,
     val carrier: String,
-    val type: String
+    val type: String,
+
+    @Column(name = "trip_id")
+    val tripId: String? = null,
+
+    @Column(name = "route_id")
+    val routeId: String? = null,
+
+    @Column(name = "shape_id")
+    val shapeId: String? = null,
+
+    @Column(name = "from_stop_sequence")
+    val fromStopSequence: Int? = null,
+
+    @Column(name = "to_stop_sequence")
+    val toStopSequence: Int? = null,
+
+    @Column(name = "from_shape_dist_traveled")
+    val fromShapeDistTraveled: Double? = null,
+
+    @Column(name = "to_shape_dist_traveled")
+    val toShapeDistTraveled: Double? = null,
 )

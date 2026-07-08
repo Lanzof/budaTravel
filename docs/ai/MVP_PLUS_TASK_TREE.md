@@ -20,26 +20,26 @@ Primary scenario:
 - [x] Identify demo route shape: `D075211` -> `CB58`.
 
 #### Task 8.1.2 — Extend GTFS import metadata
-- [ ] Add `shape_id` to GTFS trip parsing.
-- [ ] Add `shape_dist_traveled` to GTFS stop-time parsing.
-- [ ] Build `trip_id -> route_id/shape_id` metadata during import.
-- [ ] Store trip/shape metadata on generated connections.
+- [x] Add `shape_id` to GTFS trip parsing.
+- [x] Add `shape_dist_traveled` to GTFS stop-time parsing.
+- [x] Build `trip_id -> route_id/shape_id` metadata during import.
+- [x] Store trip/shape metadata on generated connections.
 
 #### Task 8.1.3 — Persist shape points
-- [ ] Add migration for `gtfs_shape_points`.
-- [ ] Add entity/repository for shape points.
-- [ ] Import `shapes.txt` points from mini archive.
-- [ ] Add indexes by `shape_id + sequence` and `shape_id + distance`.
+- [x] Add migration for `gtfs_shape_points`.
+- [x] Add entity/repository for shape points.
+- [x] Import `shapes.txt` points from mini archive.
+- [x] Add indexes by `shape_id + sequence` and `shape_id + distance`.
 
 #### Task 8.1.4 — Resolve geometry in backend
-- [ ] Query shape points for a connection by `shape_id` and distance range.
-- [ ] Add fallback to stop endpoints when shape geometry is missing.
-- [ ] Extend route DTO with optional geometry points.
-- [ ] Add tests for the known demo route geometry.
+- [x] Query shape points for a connection by `shape_id` and distance range.
+- [x] Add fallback to stop endpoints when shape geometry is missing.
+- [x] Extend route DTO with optional geometry points.
+- [x] Add tests for shape geometry resolution.
 
 #### Task 8.1.5 — Render geometry in web UI
-- [ ] Prefer backend geometry when present.
-- [ ] Keep current stop-to-stop polyline fallback.
+- [x] Prefer backend geometry when present.
+- [x] Keep current stop-to-stop polyline fallback.
 - [ ] Verify demo route no longer visually cuts through the Danube.
 
 ### Story 8.2 — Better route selection UX

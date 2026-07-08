@@ -93,6 +93,10 @@ class DtoSerializationTests {
                     arrivalTime = OffsetDateTime.parse("2025-01-10T14:50:00+01:00"),
                     carrier = "BKK",
                     type = TransportType.BUS,
+                    geometry = listOf(
+                        RouteGeometryPoint(47.4979, 19.0402),
+                        RouteGeometryPoint(47.4985, 19.0450),
+                    ),
                 )
             )
         )
@@ -113,6 +117,9 @@ class DtoSerializationTests {
         assertTrue(json.contains("\"arrivalTime\":\"2025-01-10T14:50:00+01:00\""))
         assertTrue(json.contains("\"carrier\":\"BKK\""))
         assertTrue(json.contains("\"type\":\"BUS\""))
+        assertTrue(json.contains("\"geometry\":[{"))
+        assertTrue(json.contains("\"lat\":47.4979"))
+        assertTrue(json.contains("\"lon\":19.0402"))
     }
 
     @Test

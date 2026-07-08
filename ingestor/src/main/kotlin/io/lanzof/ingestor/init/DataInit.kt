@@ -34,6 +34,7 @@ class DataInit(
         try {
             val zipPath = copyGtfsResourceToTempFile()
             gtfsService.importStopsFromZip(zipPath.toString())
+            gtfsService.importShapesFromZip(zipPath.toString())
             gtfsService.importStopTimesFromZip(zipPath.toString(), "BKK")
 
             val completed = importStatusService.markCompleted()

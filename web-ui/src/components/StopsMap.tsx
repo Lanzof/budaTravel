@@ -62,10 +62,16 @@ function routeToPolyline(route: RouteResponseDto | null): LatLngExpression[] {
     return []
   }
 
-  return route.segments.flatMap((segment) => [
-    [segment.fromLat, segment.fromLon] as LatLngExpression,
-    [segment.toLat, segment.toLon] as LatLngExpression,
-  ])
+  return route.segments.flatMap((segment) => {
+    if (segment.geometry && segment.geometry.length > 0) {
+      return segment.geometry.map((point) => [point.lat, point.lon] as LatLngExpression)
+    }
+
+    return [
+      [segment.fromLat, segment.fromLon] as LatLngExpression,
+      [segment.toLat, segment.toLon] as LatLngExpression,
+    ]
+  })
 }
 
 function formatDuration(duration: string): string {
