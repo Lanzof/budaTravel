@@ -79,7 +79,7 @@ The current route/details sidebar is useful for debugging, but it mixes product 
 
 #### Task 8.2.5.3 — Separate product UI from debug metadata
 - [x] Keep route/shape/trip IDs available while the project is in MVP/debug mode.
-- [ ] Consider moving verbose technical metadata behind a collapsible debug/details section later.
+- [x] Move verbose technical metadata behind a collapsible debug/details section.
 - [x] Avoid letting debug fields dominate the route-building workflow.
 
 ### Story 8.3 — BKK API/data source research

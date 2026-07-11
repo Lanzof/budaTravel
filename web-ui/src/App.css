@@ -420,8 +420,7 @@ code {
   line-height: 1.35;
 }
 
-.route-segment-main span,
-.route-segment-debug {
+.route-segment-main span {
   color: #64748b;
   font-size: 0.86rem;
 }
@@ -441,7 +440,37 @@ code {
   padding: 4px 8px;
 }
 
+
 .route-segment-debug {
+  color: #64748b;
+  font-size: 0.84rem;
+}
+
+.route-segment-debug summary {
+  cursor: pointer;
+  font-weight: 800;
+  outline-offset: 3px;
+}
+
+.route-segment-debug dl {
+  display: grid;
+  gap: 6px;
+  margin: 8px 0 0;
+}
+
+.route-segment-debug div {
+  display: grid;
+  grid-template-columns: 54px 1fr;
+  gap: 8px;
+}
+
+.route-segment-debug dt {
+  color: #94a3b8;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.route-segment-debug dd {
   margin: 0;
   overflow-wrap: anywhere;
 }

@@ -400,11 +400,29 @@ export function StopsMap() {
                           {stopsCount ? <span>{stopsCount}</span> : null}
                           {segment.geometry && segment.geometry.length > 0 ? <span>{segment.geometry.length} shape points</span> : null}
                         </div>
-                        <p className="route-segment-debug">
-                          {segment.from.stopId} → {segment.to.stopId}
-                          {segment.gtfs?.tripId ? ` · trip ${segment.gtfs?.tripId}` : ''}
-                          {segment.gtfs?.shapeId ? ` · shape ${segment.gtfs?.shapeId}` : ''}
-                        </p>
+                        <details className="route-segment-debug">
+                          <summary>Debug metadata</summary>
+                          <dl>
+                            <div>
+                              <dt>Stops</dt>
+                              <dd>
+                                {segment.from.stopId} → {segment.to.stopId}
+                              </dd>
+                            </div>
+                            {segment.gtfs?.tripId ? (
+                              <div>
+                                <dt>Trip</dt>
+                                <dd>{segment.gtfs.tripId}</dd>
+                              </div>
+                            ) : null}
+                            {segment.gtfs?.shapeId ? (
+                              <div>
+                                <dt>Shape</dt>
+                                <dd>{segment.gtfs.shapeId}</dd>
+                              </div>
+                            ) : null}
+                          </dl>
+                        </details>
                       </div>
                     </li>
                   )
