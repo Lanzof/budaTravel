@@ -78,6 +78,33 @@ function formatDuration(duration: string): string {
   return duration.replace('PT', '').replace('H', 'h ').replace('M', 'm').replace('S', 's')
 }
 
+function formatTime(value: string): string {
+  const timeMatch = /T(?<time>\d{2}:\d{2})/.exec(value)
+  return timeMatch?.groups?.time ?? value
+}
+
+function formatSegmentDuration(departureTime: string, arrivalTime: string): string {
+  const durationMs = new Date(arrivalTime).getTime() - new Date(departureTime).getTime()
+  if (!Number.isFinite(durationMs) || durationMs <= 0) {
+    return '≈1m'
+  }
+
+  const totalMinutes = Math.max(1, Math.round(durationMs / 60_000))
+  const hours = Math.floor(totalMinutes / 60)
+  const minutes = totalMinutes % 60
+
+  return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`
+}
+
+function formatStopsCount(fromSequence?: number | null, toSequence?: number | null): string | null {
+  if (fromSequence == null || toSequence == null) {
+    return null
+  }
+
+  const stops = Math.abs(toSequence - fromSequence)
+  return `${stops} stop${stops === 1 ? '' : 's'}`
+}
+
 function toRouteErrorMessage(error: unknown): string {
   if (error instanceof RouteSearchError && error.status === 422) {
     return 'Route not found in the bundled mini demo dataset. Try the demo route: Deak Ferenc ter M → Donati utca.'
@@ -301,6 +328,41 @@ export function StopsMap() {
               <span>{formatDuration(route.totalDuration)}</span>
               <span>Total price: {route.totalPrice}</span>
             </div>
+          ) : null}
+          {route ? (
+            <ol className="route-segments" aria-label="Route details">
+              {route.segments.map((segment, index) => {
+                const stopsCount = formatStopsCount(segment.fromStopSequence, segment.toStopSequence)
+
+                return (
+                  <li key={`${segment.fromStopId}-${segment.toStopId}-${segment.departureTime}`} className="route-segment">
+                    <div className="route-segment-index">{index + 1}</div>
+                    <div className="route-segment-body">
+                      <div className="route-segment-main">
+                        <strong>
+                          {segment.fromName} → {segment.toName}
+                        </strong>
+                        <span>
+                          {formatTime(segment.departureTime)}–{formatTime(segment.arrivalTime)} ·{' '}
+                          {formatSegmentDuration(segment.departureTime, segment.arrivalTime)}
+                        </span>
+                      </div>
+                      <div className="route-segment-meta">
+                        <span>{segment.routeId ? `Route ${segment.routeId}` : segment.carrier}</span>
+                        <span>{segment.type}</span>
+                        {stopsCount ? <span>{stopsCount}</span> : null}
+                        {segment.geometry && segment.geometry.length > 0 ? <span>{segment.geometry.length} shape points</span> : null}
+                      </div>
+                      <p className="route-segment-debug">
+                        {segment.fromStopId} → {segment.toStopId}
+                        {segment.tripId ? ` · trip ${segment.tripId}` : ''}
+                        {segment.shapeId ? ` · shape ${segment.shapeId}` : ''}
+                      </p>
+                    </div>
+                  </li>
+                )
+              })}
+            </ol>
           ) : null}
         </div>
 

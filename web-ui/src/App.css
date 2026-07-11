@@ -275,3 +275,78 @@ code {
   background: #dbeafe;
   transform: translateY(-1px);
 }
+
+.route-segments {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.route-segment {
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  gap: 12px;
+  border: 1px solid rgba(249, 115, 22, 0.22);
+  border-radius: 16px;
+  background: #fff7ed;
+  padding: 12px;
+}
+
+.route-segment-index {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 999px;
+  background: #f97316;
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 900;
+}
+
+.route-segment-body {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.route-segment-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.route-segment-main strong {
+  color: #172033;
+  line-height: 1.35;
+}
+
+.route-segment-main span,
+.route-segment-debug {
+  color: #64748b;
+  font-size: 0.86rem;
+}
+
+.route-segment-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.route-segment-meta span {
+  border-radius: 999px;
+  background: #ffedd5;
+  color: #9a3412;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 4px 8px;
+}
+
+.route-segment-debug {
+  margin: 0;
+  overflow-wrap: anywhere;
+}

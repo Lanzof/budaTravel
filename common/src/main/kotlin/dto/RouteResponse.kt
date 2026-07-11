@@ -23,6 +23,11 @@ data class RouteSegment(
     val arrivalTime: OffsetDateTime,
     val carrier: String,
     val type: TransportType,
+    val routeId: String? = null,
+    val tripId: String? = null,
+    val shapeId: String? = null,
+    val fromStopSequence: Int? = null,
+    val toStopSequence: Int? = null,
     val geometry: List<RouteGeometryPoint> = emptyList(),
 )
 

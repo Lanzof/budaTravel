@@ -105,7 +105,7 @@
 - [ ] Add stop search/autocomplete to choose origin and destination.
 - [ ] Support selecting stops from the map.
 - [ ] Keep the demo route button as a regression/sanity shortcut.
-- [ ] Show route details in a readable way, not only a line on the map.
+- [x] Show route details in a readable way, not only a line on the map.
 
 ### Story 8.3 — BKK API/data source research
 - [ ] Determine whether BKK API returns full archives or incremental data.

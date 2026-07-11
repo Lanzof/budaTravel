@@ -27,6 +27,11 @@ export interface RouteSegmentDto {
   arrivalTime: string
   carrier: string
   type: TransportType
+  routeId?: string | null
+  tripId?: string | null
+  shapeId?: string | null
+  fromStopSequence?: number | null
+  toStopSequence?: number | null
   geometry?: RouteGeometryPointDto[]
 }
 

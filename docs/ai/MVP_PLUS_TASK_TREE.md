@@ -56,9 +56,9 @@ Primary scenario:
 - [ ] Add swap origin/destination action.
 
 #### Task 8.2.3 — Route details panel
-- [ ] Show route duration and price if present.
-- [ ] Show stop sequence / segment list.
-- [ ] Show route/transport metadata when available.
+- [x] Show route duration and price if present.
+- [x] Show stop sequence / segment list.
+- [x] Show route/transport metadata when available.
 - [ ] Keep readable no-route and validation errors.
 
 ### Story 8.3 — BKK API/data source research

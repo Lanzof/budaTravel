@@ -130,6 +130,11 @@ class RoutingServiceImpl(
                         arrivalTime = segment.arrivalTime,
                         carrier = segment.carrier,
                         type = normalizeTransportType(segment.type) ?: TransportType.BUS,
+                        routeId = segment.routeId,
+                        tripId = segment.tripId,
+                        shapeId = segment.shapeId,
+                        fromStopSequence = segment.fromStopSequence,
+                        toStopSequence = segment.toStopSequence,
                         geometry = resolveGeometry(segment),
                     )
                 }
