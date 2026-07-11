@@ -16,17 +16,25 @@ The near-term goal is **not** to compete with Google Maps. The near-term goal is
   - `core` — entities, repositories, routing/search logic.
   - `common` — shared DTOs.
   - `ingestor` — GTFS import pipeline.
-- PostgreSQL via Docker Compose.
+  - `web-ui` — React/Vite/Leaflet MVP UI.
+- PostgreSQL and full local demo via Docker Compose.
 - Routing MVP exists:
   - max 3 transfers / 4 segments;
   - `FASTEST` and `CHEAPEST` optimization;
-  - returns route segments.
+  - returns nested route segments with stop, timing, transport, GTFS metadata, and geometry.
+- Web MVP exists:
+  - Budapest Leaflet map;
+  - stop markers loaded by bbox from `/api/v1/locations`;
+  - marker-based origin/destination selection;
+  - demo route button;
+  - route details panel;
+  - shape-based polyline rendering.
 - Tests pass with JDK 21:
   - `./gradlew test` → `BUILD SUCCESSFUL`.
 
 ## Recommended MVP target
 
-### MVP v0: visual proof of life
+### MVP v0: visual proof of life — implemented
 
 User story:
 
@@ -112,41 +120,42 @@ Keep full GTFS import as a separate path:
 
 ## Backend/API roadmap
 
-### Phase 1 — stabilize current MVP
+### Phase 1 — stabilize current MVP — implemented
 
-- Confirm local run path:
+- Local run path is confirmed:
   - DB starts;
-  - API starts;
-  - ingestor can populate DB;
+  - ingestor populates demo data;
+  - API starts and exposes readiness;
+  - web UI starts;
   - tests pass.
-- Document local startup in README.
-- Make sure `/api/v1/locations` works for map markers.
-- Make sure `/api/v1/routes/search` returns enough geometry data for UI.
+- Local startup is documented in README and `docs/ai/LOCAL_DEV_FLOW.md`.
+- `/api/v1/locations` works for map markers and bbox loading.
+- `/api/v1/routes/search` returns nested segment data and geometry for UI.
 
-### Phase 2 — UI-friendly API additions
+### Phase 2 — UI-friendly API additions — partly implemented
 
-Potential endpoints:
+Implemented/current endpoints:
 
 ```http
-GET /api/v1/locations?bbox=...
+GET /api/v1/locations?minLat=...&maxLat=...&minLon=...&maxLon=...
 GET /api/v1/locations/{stopId}
-GET /api/v1/locations/autocomplete?query=...
+GET /api/v1/locations/autocomplete?q=...
 POST /api/v1/routes/search
 ```
 
-For MVP, route response should include:
+Current route response includes:
 
 - total duration;
 - total price if relevant;
 - segments;
-- segment start/end stop coordinates;
+- nested segment start/end stop coordinates;
 - departure/arrival times;
 - transport type;
-- carrier/route label if available.
+- carrier/route label if available;
+- optional segment geometry points from GTFS shapes.
 
 Later it may include:
 
-- polyline geometry;
 - route color;
 - transfer instructions;
 - walking segments.
@@ -160,7 +169,7 @@ Later improvements:
 - trip grouping;
 - walking transfers between nearby stops;
 - Dijkstra/A*/time-expanded graph;
-- shape-aware route geometry.
+- stronger routing correctness around realtime/service calendars.
 
 ## Frontend recommendation
 
@@ -174,12 +183,13 @@ Reason:
 - simpler map rendering with Leaflet/MapLibre;
 - avoids Android framework complexity while backend/API are still moving.
 
-Suggested minimal frontend:
+Implemented minimal frontend:
 
 ```text
-web/
+web-ui/
   Vite + TypeScript
-  Leaflet or MapLibre
+  React
+  Leaflet
 ```
 
 MVP UI screens:
@@ -195,18 +205,16 @@ Android can become the second client after the backend contract stabilizes.
 
 ## Infrastructure roadmap
 
-### Phase 1
+### Phase 1 — implemented
 
-- `docker-compose` for Postgres + API.
-- Ingestor run separately as a manual command.
+- `docker-compose` for Postgres, ingestor, API, and web UI.
 - README with exact commands.
+- GitHub Actions for backend and frontend checks.
 
 ### Phase 2
 
-- GitHub Actions:
-  - run tests;
-  - build project;
-  - maybe build Docker image.
+- Add scripted Docker/browser smoke tests.
+- Maybe build/publish Docker images.
 
 ### Phase 3
 
@@ -220,7 +228,7 @@ Android can become the second client after the backend contract stabilizes.
 - Kubernetes only if it remains interesting as a learning goal.
 - Do not introduce it before the MVP is visible.
 
-## Suggested first issues
+## Completed first issues
 
 1. Document local development startup.
 2. Create `budapest-mini` GTFS sample dataset.
@@ -265,15 +273,16 @@ The next phase is **MVP+ / Usable Route Demo**. Its goal is to make the demo rou
 
 Priorities:
 
-1. **Shape-based route geometry**
-   - Use GTFS `shapes.txt` and `trips.shape_id`.
-   - Draw route geometry from real GTFS shape points where available.
-   - Fall back to stop-to-stop polyline when shape data cannot be resolved.
+1. **Shape-based route geometry — implemented**
+   - Uses GTFS `shapes.txt`, `trips.shape_id`, and `stop_times.shape_dist_traveled`.
+   - Draws route geometry from real GTFS shape points where available.
+   - Falls back to stop-to-stop polyline when shape data cannot be resolved.
 
-2. **Better route selection UX**
-   - Search/select origin and destination stops.
-   - Keep the demo route button for quick checks.
-   - Show readable route details and errors.
+2. **Better route selection UX — partly implemented**
+   - Marker-based origin/destination selection is implemented.
+   - Demo route button is implemented for quick checks.
+   - Readable route details/errors are implemented.
+   - Stop search/autocomplete inputs and swap action remain future work.
 
 3. **BKK API/data source research**
    - Research whether BKK API returns full archives or incremental data.

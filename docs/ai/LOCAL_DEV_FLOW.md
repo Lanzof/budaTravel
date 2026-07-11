@@ -2,8 +2,8 @@
 
 ## Purpose
 
-This document captures the current local workflow for backend MVP development.
-It is intentionally small and will evolve as the web UI and deployment setup appear.
+This document captures the current local workflow for the MVP demo.
+It covers both the Docker Compose end-to-end flow and the Gradle/npm split flow for development.
 
 ## Requirements
 
@@ -66,17 +66,13 @@ Current behavior:
 ./gradlew :api:bootRun
 ```
 
-Health check:
+Readiness check after demo data import:
 
 ```bash
-curl http://localhost:8080/api/v1/routes/health
+curl http://localhost:8080/api/v1/readiness
 ```
 
-Expected response:
-
-```text
-API is running
-```
+Expected result: `200 OK` with `ready: true` after the ingestor has completed.
 
 ## Demo API calls
 
@@ -100,6 +96,44 @@ curl -X POST 'http://localhost:8080/api/v1/routes/search' \
   }'
 ```
 
+## Start web UI locally
+
+For split local development, start the Vite app after the API is running:
+
+```bash
+cd web-ui
+npm ci
+npm run dev -- --host 127.0.0.1
+```
+
+Open:
+
+```text
+http://localhost:5173
+```
+
+The UI loads stops from `/api/v1/locations`, can set origin/destination from map markers, and can run the bundled demo route.
+
+## Full Docker demo
+
+The current one-command demo is:
+
+```bash
+docker compose up --build
+```
+
+Startup order:
+
+```text
+db -> ingestor -> api -> web-ui
+```
+
+Open:
+
+```text
+http://localhost:5173
+```
+
 ## Stop local services
 
 ```bash
@@ -114,6 +148,6 @@ docker compose down -v
 
 ## Known gaps
 
-- `docker-compose.yaml` currently includes an `app` service, but the most reliable MVP dev flow is DB + local Gradle processes.
 - Full GTFS archives are intentionally not tracked in git.
-- Web UI local flow will be documented after `web/` is introduced.
+- BKK remote/scheduled import is not implemented yet.
+- Browser E2E is still manual; no Playwright smoke test is committed yet.

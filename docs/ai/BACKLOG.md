@@ -31,41 +31,41 @@
 - [x] Document test command.
 
 ### Story 3.2 — Add CI
-- [ ] Add GitHub Actions workflow for `./gradlew test`.
-- [ ] Run CI on pushes/PRs to `ai-features` and `master`.
+- [x] Add GitHub Actions workflow for `./gradlew test`.
+- [x] Run CI on pushes/PRs to `ai-features` and `master`.
 
 ## Epic 4 — Map API readiness
 
 ### Story 4.1 — Stops on map
-- [ ] Verify `GET /api/v1/locations` response for map markers.
+- [x] Verify `GET /api/v1/locations` response for map markers.
 - [x] Evaluate whether bbox filtering is needed.
 - [x] Add bbox filtering if needed.
 
 ### Story 4.2 — Route response for UI
-- [ ] Verify `POST /api/v1/routes/search` with mini dataset.
-- [ ] Confirm response includes enough coordinates for a schematic route polyline.
-- [ ] Document demo stop pairs.
+- [x] Verify `POST /api/v1/routes/search` with mini dataset.
+- [x] Confirm response includes enough coordinates/geometry for a route polyline.
+- [x] Document demo stop pairs.
 
 ## Epic 5 — Web MVP
 
 ### Story 5.1 — Web skeleton
-- [ ] Add `web/` module/app.
-- [ ] Choose Leaflet or MapLibre.
-- [ ] Render Budapest map.
+- [x] Add `web-ui` app.
+- [x] Choose Leaflet.
+- [x] Render Budapest map.
 
 ### Story 5.2 — Stops and routes
-- [ ] Load stops from backend.
-- [ ] Draw stop markers.
-- [ ] Select origin and destination.
-- [ ] Call route search.
-- [ ] Draw returned route as a polyline.
+- [x] Load stops from backend.
+- [x] Draw stop markers.
+- [x] Select origin and destination from map markers/demo route.
+- [x] Call route search.
+- [x] Draw returned route as a polyline.
 
 ### Story 4.3 — API/UI contract sync
 - [x] Verify `budapest-mini.zip` field completeness for all data used by backend and UI.
 - [x] Document which GTFS fields may be empty and which are required for MVP.
 - [x] Define demo origin/destination stop IDs for UI development.
 - [x] Capture a sample `POST /api/v1/routes/search` request and response.
-- [ ] Decide whether route/search DTO needs extra UI fields before frontend implementation.
+- [x] Add UI route fields: nested stops/timing/transport/GTFS metadata and geometry.
 - [x] Make GTFS demo import use a stable service date from `calendar_dates.txt`.
 
 ## Epic 6 — Demo runtime orchestration
@@ -94,17 +94,17 @@
 
 ### Story 8.1 — Shape-based route geometry
 - [x] Verify that real GTFS archives and mini dataset contain populated `shapes.txt`.
-- [ ] Import GTFS shape points from `shapes.txt`.
-- [ ] Preserve `trip_id -> shape_id` from `trips.txt`.
-- [ ] Resolve shape geometry for the known demo route.
-- [ ] Extend route API response with optional geometry points.
+- [x] Import GTFS shape points from `shapes.txt`.
+- [x] Preserve `trip_id -> shape_id` from `trips.txt`.
+- [x] Resolve shape geometry for the known demo route.
+- [x] Extend route API response with optional geometry points.
 - [x] Render shape-based geometry in web UI when available.
-- [ ] Keep stop-to-stop polyline as fallback.
+- [x] Keep stop-to-stop polyline as fallback.
 
 ### Story 8.2 — Better route selection UX
 - [ ] Add stop search/autocomplete to choose origin and destination.
-- [ ] Support selecting stops from the map.
-- [ ] Keep the demo route button as a regression/sanity shortcut.
+- [x] Support selecting stops from the map.
+- [x] Keep the demo route button as a regression/sanity shortcut.
 - [x] Show route details in a readable way, not only a line on the map.
 
 ### Story 8.2.5 — Web UI layout polish

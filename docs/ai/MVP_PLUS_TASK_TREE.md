@@ -51,15 +51,15 @@ Primary scenario:
 - [ ] Preserve stop ID visibility for debugging.
 
 #### Task 8.2.2 — Map selection
-- [ ] Allow clicking a stop marker to set origin or destination.
-- [ ] Highlight selected origin/destination markers.
+- [x] Allow clicking a stop marker to set origin or destination.
+- [x] Highlight selected origin/destination markers.
 - [ ] Add swap origin/destination action.
 
 #### Task 8.2.3 — Route details panel
 - [x] Show route duration and price if present.
 - [x] Show stop sequence / segment list.
 - [x] Show route/transport metadata when available.
-- [ ] Keep readable no-route and validation errors.
+- [x] Keep readable no-route and validation errors.
 
 ### Story 8.2.5 — Web UI layout polish
 
