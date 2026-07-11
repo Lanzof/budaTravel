@@ -4,10 +4,14 @@ import io.lanzof.core.entity.Connection
 import io.lanzof.core.repo.ConnectionRepo
 import io.lanzof.core.repo.GtfsShapePointRepo
 import io.lanzof.core.repo.LocationRepo
+import io.lanzof.dto.GtfsSegmentMetadata
 import io.lanzof.dto.RouteGeometryPoint
 import io.lanzof.dto.RouteOptimization
 import io.lanzof.dto.RouteResponse
 import io.lanzof.dto.RouteSegment
+import io.lanzof.dto.RouteSegmentTiming
+import io.lanzof.dto.RouteStop
+import io.lanzof.dto.RouteTransport
 import io.lanzof.dto.TransportType
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
@@ -118,23 +122,28 @@ class RoutingServiceImpl(
                 totalPrice = path.totalPrice,
                 segments = path.segments.map { segment ->
                     RouteSegment(
-                        fromStopId = segment.fromLocation.stopId,
-                        toStopId = segment.toLocation.stopId,
-                        fromName = segment.fromLocation.name,
-                        toName = segment.toLocation.name,
-                        fromLat = segment.fromLocation.lat,
-                        fromLon = segment.fromLocation.lon,
-                        toLat = segment.toLocation.lat,
-                        toLon = segment.toLocation.lon,
-                        departureTime = segment.departureTime,
-                        arrivalTime = segment.arrivalTime,
-                        carrier = segment.carrier,
-                        type = normalizeTransportType(segment.type) ?: TransportType.BUS,
-                        routeId = segment.routeId,
-                        tripId = segment.tripId,
-                        shapeId = segment.shapeId,
-                        fromStopSequence = segment.fromStopSequence,
-                        toStopSequence = segment.toStopSequence,
+                        from = RouteStop(
+                            stopId = segment.fromLocation.stopId,
+                            name = segment.fromLocation.name,
+                            lat = segment.fromLocation.lat,
+                            lon = segment.fromLocation.lon,
+                        ),
+                        to = RouteStop(
+                            stopId = segment.toLocation.stopId,
+                            name = segment.toLocation.name,
+                            lat = segment.toLocation.lat,
+                            lon = segment.toLocation.lon,
+                        ),
+                        timing = RouteSegmentTiming(
+                            departureTime = segment.departureTime,
+                            arrivalTime = segment.arrivalTime,
+                        ),
+                        transport = RouteTransport(
+                            carrier = segment.carrier,
+                            type = normalizeTransportType(segment.type) ?: TransportType.BUS,
+                            routeId = segment.routeId,
+                        ),
+                        gtfs = segment.toGtfsMetadata(),
                         geometry = resolveGeometry(segment),
                     )
                 }
@@ -165,6 +174,19 @@ class RoutingServiceImpl(
         return listOf(
             RouteGeometryPoint(segment.fromLocation.lat, segment.fromLocation.lon),
             RouteGeometryPoint(segment.toLocation.lat, segment.toLocation.lon),
+        )
+    }
+
+    private fun Connection.toGtfsMetadata(): GtfsSegmentMetadata? {
+        if (tripId == null && shapeId == null && fromStopSequence == null && toStopSequence == null) {
+            return null
+        }
+
+        return GtfsSegmentMetadata(
+            tripId = tripId,
+            shapeId = shapeId,
+            fromStopSequence = fromStopSequence,
+            toStopSequence = toStopSequence,
         )
     }
 

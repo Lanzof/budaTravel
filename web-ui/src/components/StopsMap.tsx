@@ -68,8 +68,8 @@ function routeToPolyline(route: RouteResponseDto | null): LatLngExpression[] {
     }
 
     return [
-      [segment.fromLat, segment.fromLon] as LatLngExpression,
-      [segment.toLat, segment.toLon] as LatLngExpression,
+      [segment.from.lat, segment.from.lon] as LatLngExpression,
+      [segment.to.lat, segment.to.lon] as LatLngExpression,
     ]
   })
 }
@@ -332,31 +332,31 @@ export function StopsMap() {
           {route ? (
             <ol className="route-segments" aria-label="Route details">
               {route.segments.map((segment, index) => {
-                const stopsCount = formatStopsCount(segment.fromStopSequence, segment.toStopSequence)
+                const stopsCount = formatStopsCount(segment.gtfs?.fromStopSequence, segment.gtfs?.toStopSequence)
 
                 return (
-                  <li key={`${segment.fromStopId}-${segment.toStopId}-${segment.departureTime}`} className="route-segment">
+                  <li key={`${segment.from.stopId}-${segment.to.stopId}-${segment.timing.departureTime}`} className="route-segment">
                     <div className="route-segment-index">{index + 1}</div>
                     <div className="route-segment-body">
                       <div className="route-segment-main">
                         <strong>
-                          {segment.fromName} → {segment.toName}
+                          {segment.from.name} → {segment.to.name}
                         </strong>
                         <span>
-                          {formatTime(segment.departureTime)}–{formatTime(segment.arrivalTime)} ·{' '}
-                          {formatSegmentDuration(segment.departureTime, segment.arrivalTime)}
+                          {formatTime(segment.timing.departureTime)}–{formatTime(segment.timing.arrivalTime)} ·{' '}
+                          {formatSegmentDuration(segment.timing.departureTime, segment.timing.arrivalTime)}
                         </span>
                       </div>
                       <div className="route-segment-meta">
-                        <span>{segment.routeId ? `Route ${segment.routeId}` : segment.carrier}</span>
-                        <span>{segment.type}</span>
+                        <span>{segment.transport.routeId ? `Route ${segment.transport.routeId}` : segment.transport.carrier}</span>
+                        <span>{segment.transport.type}</span>
                         {stopsCount ? <span>{stopsCount}</span> : null}
                         {segment.geometry && segment.geometry.length > 0 ? <span>{segment.geometry.length} shape points</span> : null}
                       </div>
                       <p className="route-segment-debug">
-                        {segment.fromStopId} → {segment.toStopId}
-                        {segment.tripId ? ` · trip ${segment.tripId}` : ''}
-                        {segment.shapeId ? ` · shape ${segment.shapeId}` : ''}
+                        {segment.from.stopId} → {segment.to.stopId}
+                        {segment.gtfs?.tripId ? ` · trip ${segment.gtfs?.tripId}` : ''}
+                        {segment.gtfs?.shapeId ? ` · shape ${segment.gtfs?.shapeId}` : ''}
                       </p>
                     </div>
                   </li>

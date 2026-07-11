@@ -40,6 +40,9 @@
   grid-template-columns: minmax(0, 1fr) 360px;
   gap: 20px;
   padding: 0 clamp(16px, 4vw, 56px) 40px;
+  align-items: stretch;
+  height: calc(100vh - 180px);
+  min-height: 620px;
 }
 
 .map-panel,
@@ -51,13 +54,13 @@
 }
 
 .map-panel {
-  min-height: 620px;
+  min-height: 0;
   overflow: hidden;
 }
 
 .map {
   width: 100%;
-  height: 620px;
+  height: 100%;
 }
 
 .sidebar {
@@ -65,6 +68,8 @@
   flex-direction: column;
   gap: 24px;
   padding: 28px;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .sidebar h2,
@@ -135,6 +140,16 @@ code {
 @media (max-width: 960px) {
   .map-shell {
     grid-template-columns: 1fr;
+  }
+
+  .map-shell {
+    height: auto;
+    min-height: 0;
+  }
+
+  .sidebar {
+    max-height: none;
+    overflow-y: visible;
   }
 
   .map-panel,
