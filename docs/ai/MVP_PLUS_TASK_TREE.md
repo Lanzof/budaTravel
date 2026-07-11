@@ -56,10 +56,31 @@ Primary scenario:
 - [ ] Add swap origin/destination action.
 
 #### Task 8.2.3 — Route details panel
-- [ ] Show route duration and price if present.
-- [ ] Show stop sequence / segment list.
-- [ ] Show route/transport metadata when available.
+- [x] Show route duration and price if present.
+- [x] Show stop sequence / segment list.
+- [x] Show route/transport metadata when available.
 - [ ] Keep readable no-route and validation errors.
+
+### Story 8.2.5 — Web UI layout polish
+
+The current route/details sidebar is useful for debugging, but it mixes product controls with MVP/debug information. Future UI cleanup should make the route-building flow more stable and readable.
+
+#### Task 8.2.5.1 — Move technical/demo info to the header area
+- [ ] Move MVP description, API endpoint hint, loaded stops count, loading status, and demo route action from the right sidebar to the top/header area near `budaTravel map MVP`.
+- [ ] Keep this block compact so it does not compete with the map.
+- [ ] Preserve demo route as a fast regression/sanity action for local MVP checks.
+
+#### Task 8.2.5.2 — Reorder the right sidebar around user flow
+- [ ] Show selected stop first.
+- [ ] Keep a stable selected-stop placeholder when nothing is selected so the panel does not jump after marker clicks.
+- [ ] Show origin/destination route controls after the selected stop block.
+- [ ] Show route summary after route controls.
+- [ ] Show route segments after route summary.
+
+#### Task 8.2.5.3 — Separate product UI from debug metadata
+- [ ] Keep route/shape/trip IDs available while the project is in MVP/debug mode.
+- [ ] Consider moving verbose technical metadata behind a collapsible debug/details section later.
+- [ ] Avoid letting debug fields dominate the route-building workflow.
 
 ### Story 8.3 — BKK API/data source research
 
@@ -127,7 +148,7 @@ Primary scenario:
 1. Shape metadata + shape point import.
 2. Backend route geometry response.
 3. Web UI geometry rendering.
-4. Stop search and route details UX.
+4. Stop search, route details UX, and layout polish.
 5. BKK API/data source research.
 6. Ingestor source profiles and provider abstraction.
 7. Scheduled import design/implementation.

@@ -68,14 +68,41 @@ function routeToPolyline(route: RouteResponseDto | null): LatLngExpression[] {
     }
 
     return [
-      [segment.fromLat, segment.fromLon] as LatLngExpression,
-      [segment.toLat, segment.toLon] as LatLngExpression,
+      [segment.from.lat, segment.from.lon] as LatLngExpression,
+      [segment.to.lat, segment.to.lon] as LatLngExpression,
     ]
   })
 }
 
 function formatDuration(duration: string): string {
   return duration.replace('PT', '').replace('H', 'h ').replace('M', 'm').replace('S', 's')
+}
+
+function formatTime(value: string): string {
+  const timeMatch = /T(?<time>\d{2}:\d{2})/.exec(value)
+  return timeMatch?.groups?.time ?? value
+}
+
+function formatSegmentDuration(departureTime: string, arrivalTime: string): string {
+  const durationMs = new Date(arrivalTime).getTime() - new Date(departureTime).getTime()
+  if (!Number.isFinite(durationMs) || durationMs <= 0) {
+    return '≈1m'
+  }
+
+  const totalMinutes = Math.max(1, Math.round(durationMs / 60_000))
+  const hours = Math.floor(totalMinutes / 60)
+  const minutes = totalMinutes % 60
+
+  return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`
+}
+
+function formatStopsCount(fromSequence?: number | null, toSequence?: number | null): string | null {
+  if (fromSequence == null || toSequence == null) {
+    return null
+  }
+
+  const stops = Math.abs(toSequence - fromSequence)
+  return `${stops} stop${stops === 1 ? '' : 's'}`
 }
 
 function toRouteErrorMessage(error: unknown): string {
@@ -301,6 +328,41 @@ export function StopsMap() {
               <span>{formatDuration(route.totalDuration)}</span>
               <span>Total price: {route.totalPrice}</span>
             </div>
+          ) : null}
+          {route ? (
+            <ol className="route-segments" aria-label="Route details">
+              {route.segments.map((segment, index) => {
+                const stopsCount = formatStopsCount(segment.gtfs?.fromStopSequence, segment.gtfs?.toStopSequence)
+
+                return (
+                  <li key={`${segment.from.stopId}-${segment.to.stopId}-${segment.timing.departureTime}`} className="route-segment">
+                    <div className="route-segment-index">{index + 1}</div>
+                    <div className="route-segment-body">
+                      <div className="route-segment-main">
+                        <strong>
+                          {segment.from.name} → {segment.to.name}
+                        </strong>
+                        <span>
+                          {formatTime(segment.timing.departureTime)}–{formatTime(segment.timing.arrivalTime)} ·{' '}
+                          {formatSegmentDuration(segment.timing.departureTime, segment.timing.arrivalTime)}
+                        </span>
+                      </div>
+                      <div className="route-segment-meta">
+                        <span>{segment.transport.routeId ? `Route ${segment.transport.routeId}` : segment.transport.carrier}</span>
+                        <span>{segment.transport.type}</span>
+                        {stopsCount ? <span>{stopsCount}</span> : null}
+                        {segment.geometry && segment.geometry.length > 0 ? <span>{segment.geometry.length} shape points</span> : null}
+                      </div>
+                      <p className="route-segment-debug">
+                        {segment.from.stopId} → {segment.to.stopId}
+                        {segment.gtfs?.tripId ? ` · trip ${segment.gtfs?.tripId}` : ''}
+                        {segment.gtfs?.shapeId ? ` · shape ${segment.gtfs?.shapeId}` : ''}
+                      </p>
+                    </div>
+                  </li>
+                )
+              })}
+            </ol>
           ) : null}
         </div>
 

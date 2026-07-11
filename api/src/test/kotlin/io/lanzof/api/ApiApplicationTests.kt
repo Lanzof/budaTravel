@@ -392,8 +392,8 @@ class ApiApplicationTests {
         val routes = response.body!!
         assertEquals(2, routes.size)
         assertEquals(3, routes.first().segments.size)
-        assertEquals(listOf("A", "C1", "D1"), routes.first().segments.map { it.fromStopId })
-        assertEquals("B", routes.first().segments.last().toStopId)
+        assertEquals(listOf("A", "C1", "D1"), routes.first().segments.map { it.from.stopId })
+        assertEquals("B", routes.first().segments.last().to.stopId)
         assertTrue(routes.none { it.segments.size > 4 })
     }
 
@@ -429,10 +429,10 @@ class ApiApplicationTests {
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(1, response.body!!.size)
         assertEquals(1, response.body!![0].segments.size)
-        assertEquals("A", response.body!![0].segments[0].fromStopId)
-        assertEquals("B", response.body!![0].segments[0].toStopId)
-        assertEquals("Stop A", response.body!![0].segments[0].fromName)
-        assertEquals("Stop B", response.body!![0].segments[0].toName)
+        assertEquals("A", response.body!![0].segments[0].from.stopId)
+        assertEquals("B", response.body!![0].segments[0].to.stopId)
+        assertEquals("Stop A", response.body!![0].segments[0].from.name)
+        assertEquals("Stop B", response.body!![0].segments[0].to.name)
     }
 
     @Test
@@ -492,7 +492,7 @@ class ApiApplicationTests {
         )
 
         assertEquals(HttpStatus.OK, fastestResponse.statusCode)
-        assertEquals(listOf("A", "C"), fastestResponse.body!!.first().segments.map { it.fromStopId })
+        assertEquals(listOf("A", "C"), fastestResponse.body!!.first().segments.map { it.from.stopId })
 
         val cheapestRequest = fastestRequest.copy(optimization = RouteOptimization.CHEAPEST)
         val cheapestResponse = restTemplate.exchange(
@@ -503,7 +503,7 @@ class ApiApplicationTests {
         )
 
         assertEquals(HttpStatus.OK, cheapestResponse.statusCode)
-        assertEquals(listOf("A", "D"), cheapestResponse.body!!.first().segments.map { it.fromStopId })
+        assertEquals(listOf("A", "D"), cheapestResponse.body!!.first().segments.map { it.from.stopId })
     }
 
     @Test
@@ -540,7 +540,7 @@ class ApiApplicationTests {
         assertEquals(1, response.body!![0].segments.size)
         assertEquals(
             OffsetDateTime.parse("2026-01-27T00:05:00+01:00").toInstant(),
-            response.body!![0].segments[0].arrivalTime.toInstant()
+            response.body!![0].segments[0].timing.arrivalTime.toInstant()
         )
     }
 

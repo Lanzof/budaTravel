@@ -1,5 +1,6 @@
 package io.lanzof.dto
 
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -20,6 +21,7 @@ class DtoSerializationTests {
         .registerModule(JavaTimeModule())
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
         .disable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS)
+        .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
 
     @Test
     fun `location dto serializes with expected fields`() {
@@ -75,24 +77,39 @@ class DtoSerializationTests {
     }
 
     @Test
-    fun `route response serializes with updated segment structure`() {
+    fun `route response serializes with nested segment structure`() {
         val response = RouteResponse(
             totalDuration = Duration.ofMinutes(90),
             totalPrice = BigDecimal("12.50"),
             segments = listOf(
                 RouteSegment(
-                    fromStopId = "STOP_A",
-                    toStopId = "STOP_B",
-                    fromName = "Budapest, Stop A",
-                    toName = "Budapest, Stop B",
-                    fromLat = 47.4979,
-                    fromLon = 19.0402,
-                    toLat = 47.4985,
-                    toLon = 19.0450,
-                    departureTime = OffsetDateTime.parse("2025-01-10T14:30:00+01:00"),
-                    arrivalTime = OffsetDateTime.parse("2025-01-10T14:50:00+01:00"),
-                    carrier = "BKK",
-                    type = TransportType.BUS,
+                    from = RouteStop(
+                        stopId = "STOP_A",
+                        name = "Budapest, Stop A",
+                        lat = 47.4979,
+                        lon = 19.0402,
+                    ),
+                    to = RouteStop(
+                        stopId = "STOP_B",
+                        name = "Budapest, Stop B",
+                        lat = 47.4985,
+                        lon = 19.0450,
+                    ),
+                    timing = RouteSegmentTiming(
+                        departureTime = OffsetDateTime.parse("2025-01-10T14:30:00+01:00"),
+                        arrivalTime = OffsetDateTime.parse("2025-01-10T14:50:00+01:00"),
+                    ),
+                    transport = RouteTransport(
+                        carrier = "BKK",
+                        type = TransportType.BUS,
+                        routeId = "0160",
+                    ),
+                    gtfs = GtfsSegmentMetadata(
+                        tripId = "D075211",
+                        shapeId = "CB58",
+                        fromStopSequence = 1,
+                        toStopSequence = 2,
+                    ),
                     geometry = listOf(
                         RouteGeometryPoint(47.4979, 19.0402),
                         RouteGeometryPoint(47.4985, 19.0450),
@@ -100,26 +117,52 @@ class DtoSerializationTests {
                 )
             )
         )
+        val expectedJson = """
+            {
+              "totalDuration": "PT1H30M",
+              "totalPrice": 12.50,
+              "segments": [
+                {
+                  "from": {
+                    "stopId": "STOP_A",
+                    "name": "Budapest, Stop A",
+                    "lat": 47.4979,
+                    "lon": 19.0402
+                  },
+                  "to": {
+                    "stopId": "STOP_B",
+                    "name": "Budapest, Stop B",
+                    "lat": 47.4985,
+                    "lon": 19.045
+                  },
+                  "timing": {
+                    "departureTime": "2025-01-10T14:30:00+01:00",
+                    "arrivalTime": "2025-01-10T14:50:00+01:00"
+                  },
+                  "transport": {
+                    "carrier": "BKK",
+                    "type": "BUS",
+                    "routeId": "0160"
+                  },
+                  "gtfs": {
+                    "tripId": "D075211",
+                    "shapeId": "CB58",
+                    "fromStopSequence": 1,
+                    "toStopSequence": 2
+                  },
+                  "geometry": [
+                    { "lat": 47.4979, "lon": 19.0402 },
+                    { "lat": 47.4985, "lon": 19.045 }
+                  ]
+                }
+              ]
+            }
+        """.trimIndent()
 
-        val json = objectMapper.writeValueAsString(response)
+        val actual = objectMapper.readTree(objectMapper.writeValueAsString(response))
+        val expected = objectMapper.readTree(expectedJson)
 
-        assertTrue(json.contains("\"totalDuration\":\"PT1H30M\""))
-        assertTrue(json.contains("\"totalPrice\":12.50"))
-        assertTrue(json.contains("\"fromStopId\":\"STOP_A\""))
-        assertTrue(json.contains("\"toStopId\":\"STOP_B\""))
-        assertTrue(json.contains("\"fromName\":\"Budapest, Stop A\""))
-        assertTrue(json.contains("\"toName\":\"Budapest, Stop B\""))
-        assertTrue(json.contains("\"fromLat\":47.4979"))
-        assertTrue(json.contains("\"fromLon\":19.0402"))
-        assertTrue(json.contains("\"toLat\":47.4985"))
-        assertTrue(json.contains("\"toLon\":19.045"))
-        assertTrue(json.contains("\"departureTime\":\"2025-01-10T14:30:00+01:00\""))
-        assertTrue(json.contains("\"arrivalTime\":\"2025-01-10T14:50:00+01:00\""))
-        assertTrue(json.contains("\"carrier\":\"BKK\""))
-        assertTrue(json.contains("\"type\":\"BUS\""))
-        assertTrue(json.contains("\"geometry\":[{"))
-        assertTrue(json.contains("\"lat\":47.4979"))
-        assertTrue(json.contains("\"lon\":19.0402"))
+        assertEquals(expected, actual)
     }
 
     @Test

@@ -14,19 +14,37 @@ export interface RouteGeometryPointDto {
   lon: number
 }
 
-export interface RouteSegmentDto {
-  fromStopId: string
-  toStopId: string
-  fromName: string
-  toName: string
-  fromLat: number
-  fromLon: number
-  toLat: number
-  toLon: number
+export interface RouteStopDto {
+  stopId: string
+  name: string
+  lat: number
+  lon: number
+}
+
+export interface RouteSegmentTimingDto {
   departureTime: string
   arrivalTime: string
+}
+
+export interface RouteTransportDto {
   carrier: string
   type: TransportType
+  routeId?: string | null
+}
+
+export interface GtfsSegmentMetadataDto {
+  tripId?: string | null
+  shapeId?: string | null
+  fromStopSequence?: number | null
+  toStopSequence?: number | null
+}
+
+export interface RouteSegmentDto {
+  from: RouteStopDto
+  to: RouteStopDto
+  timing: RouteSegmentTimingDto
+  transport: RouteTransportDto
+  gtfs?: GtfsSegmentMetadataDto | null
   geometry?: RouteGeometryPointDto[]
 }
 
