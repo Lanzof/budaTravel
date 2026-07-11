@@ -40,7 +40,7 @@ Primary scenario:
 #### Task 8.1.5 — Render geometry in web UI
 - [x] Prefer backend geometry when present.
 - [x] Keep current stop-to-stop polyline fallback.
-- [ ] Verify demo route no longer visually cuts through the Danube.
+- [x] Verify demo route no longer visually cuts through the Danube in local Docker demo.
 
 ### Story 8.2 — Better route selection UX
 
@@ -106,6 +106,7 @@ Primary scenario:
 
 #### Task 8.5.1 — Docker smoke test
 - [ ] Add a scripted smoke test for Docker Compose demo startup.
+- [x] Manually verify Docker Compose demo startup and demo route rendering after shape geometry implementation.
 - [ ] Check API readiness.
 - [ ] Check web UI is reachable.
 - [ ] Optionally call demo route API.
@@ -131,3 +132,20 @@ Primary scenario:
 6. Ingestor source profiles and provider abstraction.
 7. Scheduled import design/implementation.
 8. E2E smoke/demo polish.
+
+
+### Story 8.6 — Next-stage realtime and geocoding experiments
+
+These items are intentionally postponed until after the current shape-geometry MVP+ work.
+
+#### Task 8.6.1 — BKK realtime research
+- [ ] Research BKK GTFS-Realtime endpoints and response formats.
+- [ ] Determine whether BKK exposes protobuf-over-HTTP feeds or actual gRPC services.
+- [ ] Evaluate live vehicle positions as a WebClient/WebFlux + SSE experiment.
+- [ ] Decide whether realtime positions should be rendered on the map.
+
+#### Task 8.6.2 — OSM geocoding research
+- [ ] Compare Nominatim, Photon, and Pelias-like geocoding options for Budapest address/place search.
+- [ ] Check public API limits and acceptable usage policies.
+- [ ] Design geocoding-to-nearest-stop flow.
+- [ ] Decide whether geocoding belongs in product roadmap or remains an experiment.

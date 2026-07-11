@@ -98,7 +98,7 @@
 - [ ] Preserve `trip_id -> shape_id` from `trips.txt`.
 - [ ] Resolve shape geometry for the known demo route.
 - [ ] Extend route API response with optional geometry points.
-- [ ] Render shape-based geometry in web UI when available.
+- [x] Render shape-based geometry in web UI when available.
 - [ ] Keep stop-to-stop polyline as fallback.
 
 ### Story 8.2 — Better route selection UX
@@ -125,6 +125,14 @@
 
 ### Story 8.5 — E2E and demo quality
 - [ ] Add Docker Compose smoke test for demo stack startup.
+- [x] Manually verify Docker demo locally: demo route renders correctly with shape-based geometry.
 - [ ] Add route API smoke check for the known demo route.
 - [ ] Add browser E2E later: open UI, click demo route, verify route line.
 - [ ] Add screenshots/GIF and one-command demo documentation.
+
+
+### Story 8.6 — Next-stage realtime/geocoding experiments
+- [ ] Research BKK GTFS-Realtime / live vehicle positions for a later WebClient/WebFlux + SSE experiment.
+- [ ] Check whether BKK realtime is protobuf-over-HTTP or actual gRPC.
+- [ ] Research OpenStreetMap geocoding options: Nominatim, Photon, Pelias-like services.
+- [ ] Design address/place search -> nearest stop flow for a later stage.
