@@ -107,6 +107,13 @@
 - [ ] Keep the demo route button as a regression/sanity shortcut.
 - [x] Show route details in a readable way, not only a line on the map.
 
+### Story 8.8 — Web UI layout polish
+- [ ] Move MVP/debug info, endpoint hint, loaded stops count, status, and demo route action to the top/header area.
+- [ ] Keep the right sidebar focused on selected stop, origin/destination, route summary, and route segments.
+- [ ] Reorder the sidebar: selected stop placeholder first, then route controls, then route summary, then segment list.
+- [ ] Keep selected-stop placeholder stable so the interface does not jump when a marker is selected.
+- [ ] Consider moving verbose route/GTFS debug metadata behind a collapsible details section later.
+
 ### Story 8.3 — BKK API/data source research
 - [ ] Determine whether BKK API returns full archives or incremental data.
 - [ ] Check archive size, update frequency, and required auth.
