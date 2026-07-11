@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { CircleMarker, MapContainer, Polyline, Popup, TileLayer, useMapEvents } from 'react-leaflet'
 import type { LatLngBounds, LatLngExpression } from 'leaflet'
-import { fetchLocations, type BoundingBox, type LocationDto } from '../api/locations'
+import { fetchLocations, fetchLocationSuggestions, type BoundingBox, type LocationDto } from '../api/locations'
 import { RouteSearchError, searchRoutes, type RouteResponseDto } from '../api/routes'
 import 'leaflet/dist/leaflet.css'
 
@@ -117,6 +117,101 @@ function toRouteErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : 'Unknown route search error'
 }
 
+interface StopSearchBoxProps {
+  label: string
+  query: string
+  selected: LocationDto | null
+  onQueryChange: (query: string) => void
+  onSelect: (location: LocationDto) => void
+}
+
+function StopSearchBox({ label, query, selected, onQueryChange, onSelect }: StopSearchBoxProps) {
+  const [suggestions, setSuggestions] = useState<LocationDto[]>([])
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false)
+  const [suggestionError, setSuggestionError] = useState<string | null>(null)
+  const trimmedQuery = query.trim()
+  const matchesSelected = selected?.name === trimmedQuery
+  const shouldSearch = trimmedQuery.length >= 2 && !matchesSelected
+
+  useEffect(() => {
+    if (!shouldSearch) {
+      setSuggestions([])
+      setSuggestionError(null)
+      setIsLoadingSuggestions(false)
+      return
+    }
+
+    const abortController = new AbortController()
+    const timeout = window.setTimeout(() => {
+      setIsLoadingSuggestions(true)
+      setSuggestionError(null)
+
+      fetchLocationSuggestions(trimmedQuery, abortController.signal)
+        .then(setSuggestions)
+        .catch((nextError: unknown) => {
+          if (abortController.signal.aborted) {
+            return
+          }
+          setSuggestionError(nextError instanceof Error ? nextError.message : 'Unknown autocomplete error')
+        })
+        .finally(() => {
+          if (!abortController.signal.aborted) {
+            setIsLoadingSuggestions(false)
+          }
+        })
+    }, 250)
+
+    return () => {
+      window.clearTimeout(timeout)
+      abortController.abort()
+    }
+  }, [shouldSearch, trimmedQuery])
+
+  function handleSuggestionSelect(location: LocationDto): void {
+    setSuggestions([])
+    onSelect(location)
+  }
+
+  return (
+    <div className="stop-search-box">
+      <label>
+        <span>{label}</span>
+        <input
+          type="search"
+          value={query}
+          placeholder="Search stop name or id"
+          onChange={(event) => onQueryChange(event.target.value)}
+        />
+      </label>
+
+      {selected ? (
+        <p className="selected-stop-chip">
+          {selected.name} <code>{selected.stopId}</code>
+        </p>
+      ) : null}
+
+      {isLoadingSuggestions ? <p className="suggestion-hint">Searching stops…</p> : null}
+      {suggestionError ? <p className="suggestion-error">{suggestionError}</p> : null}
+
+      {shouldSearch && suggestions.length > 0 ? (
+        <ul className="stop-suggestions" aria-label={`${label} suggestions`}>
+          {suggestions.map((suggestion) => (
+            <li key={suggestion.stopId}>
+              <button type="button" onClick={() => handleSuggestionSelect(suggestion)}>
+                <strong>{suggestion.name}</strong>
+                <span>{suggestion.stopId}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+
+      {shouldSearch && !isLoadingSuggestions && suggestions.length === 0 && !suggestionError ? (
+        <p className="suggestion-hint">No stops found.</p>
+      ) : null}
+    </div>
+  )
+}
 export function StopsMap() {
   const [bounds, setBounds] = useState<BoundingBox>(DEFAULT_BOUNDS)
   const [locations, setLocations] = useState<LocationDto[]>([])
@@ -124,6 +219,8 @@ export function StopsMap() {
   const [origin, setOrigin] = useState<LocationDto | null>(null)
   const [destination, setDestination] = useState<LocationDto | null>(null)
   const [route, setRoute] = useState<RouteResponseDto | null>(null)
+  const [originQuery, setOriginQuery] = useState('')
+  const [destinationQuery, setDestinationQuery] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isSearchingRoute, setIsSearchingRoute] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -194,19 +291,51 @@ export function StopsMap() {
 
   function markAsOrigin(location: LocationDto): void {
     setOrigin(location)
+    setOriginQuery(location.name)
     setRoute(null)
     setRouteError(null)
   }
 
   function markAsDestination(location: LocationDto): void {
     setDestination(location)
+    setDestinationQuery(location.name)
     setRoute(null)
     setRouteError(null)
+  }
+
+  function handleOriginQueryChange(query: string): void {
+    setOriginQuery(query)
+    if (origin && query !== origin.name) {
+      setOrigin(null)
+      setRoute(null)
+      setRouteError(null)
+    }
+  }
+
+  function handleDestinationQueryChange(query: string): void {
+    setDestinationQuery(query)
+    if (destination && query !== destination.name) {
+      setDestination(null)
+      setRoute(null)
+      setRouteError(null)
+    }
+  }
+
+  function selectOrigin(location: LocationDto): void {
+    markAsOrigin(location)
+    setSelectedStopId(location.stopId)
+  }
+
+  function selectDestination(location: LocationDto): void {
+    markAsDestination(location)
+    setSelectedStopId(location.stopId)
   }
 
   function useDemoRoute(): void {
     setOrigin(DEMO_ORIGIN)
     setDestination(DEMO_DESTINATION)
+    setOriginQuery(DEMO_ORIGIN.name)
+    setDestinationQuery(DEMO_DESTINATION.name)
     setSelectedStopId(DEMO_ORIGIN.stopId)
     setRoute(null)
     setRouteError(null)
@@ -340,14 +469,20 @@ export function StopsMap() {
 
           <div className="route-card">
             <p className="eyebrow">Route search</p>
-            <div className="route-stop-row">
-              <span>Origin</span>
-              <strong>{origin?.name ?? 'Not selected'}</strong>
-            </div>
-            <div className="route-stop-row">
-              <span>Destination</span>
-              <strong>{destination?.name ?? 'Not selected'}</strong>
-            </div>
+            <StopSearchBox
+              label="Origin"
+              query={originQuery}
+              selected={origin}
+              onQueryChange={handleOriginQueryChange}
+              onSelect={selectOrigin}
+            />
+            <StopSearchBox
+              label="Destination"
+              query={destinationQuery}
+              selected={destination}
+              onQueryChange={handleDestinationQueryChange}
+              onSelect={selectDestination}
+            />
             <p className="route-hint">
               Uses the demo GTFS service date: <code>2026-01-27 04:44 Europe/Budapest</code>.
             </p>

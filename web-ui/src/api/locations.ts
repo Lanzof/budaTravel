@@ -29,3 +29,18 @@ export async function fetchLocations(bounds: BoundingBox, signal?: AbortSignal):
 
   return response.json() as Promise<LocationDto[]>
 }
+
+export async function fetchLocationSuggestions(query: string, signal?: AbortSignal): Promise<LocationDto[]> {
+  const params = new URLSearchParams({
+    q: query,
+    limit: '8',
+  })
+
+  const response = await fetch(`/api/v1/locations/autocomplete?${params.toString()}`, { signal })
+
+  if (!response.ok) {
+    throw new Error(`Location autocomplete request failed with HTTP ${response.status}`)
+  }
+
+  return response.json() as Promise<LocationDto[]>
+}

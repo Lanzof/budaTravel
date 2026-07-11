@@ -474,3 +474,86 @@ code {
   margin: 0;
   overflow-wrap: anywhere;
 }
+
+.stop-search-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stop-search-box label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stop-search-box label span {
+  color: #64748b;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.stop-search-box input {
+  width: 100%;
+  border: 1px solid rgba(37, 99, 235, 0.22);
+  border-radius: 12px;
+  background: #ffffff;
+  color: #172033;
+  font: inherit;
+  padding: 10px 12px;
+}
+
+.stop-search-box input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+  outline: none;
+}
+
+.selected-stop-chip,
+.suggestion-hint,
+.suggestion-error {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.suggestion-error {
+  color: #b91c1c;
+}
+
+.stop-suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.stop-suggestions button {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 3px;
+  border: 1px solid rgba(37, 99, 235, 0.16);
+  border-radius: 12px;
+  background: #ffffff;
+  color: #172033;
+  cursor: pointer;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.stop-suggestions button:hover,
+.stop-suggestions button:focus-visible {
+  border-color: rgba(37, 99, 235, 0.34);
+  background: #eff6ff;
+  outline: none;
+}
+
+.stop-suggestions span {
+  color: #64748b;
+  font-size: 0.82rem;
+}
