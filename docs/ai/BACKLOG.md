@@ -107,7 +107,7 @@
 - [ ] Keep the demo route button as a regression/sanity shortcut.
 - [x] Show route details in a readable way, not only a line on the map.
 
-### Story 8.8 — Web UI layout polish
+### Story 8.2.5 — Web UI layout polish
 - [ ] Move MVP/debug info, endpoint hint, loaded stops count, status, and demo route action to the top/header area.
 - [ ] Keep the right sidebar focused on selected stop, origin/destination, route summary, and route segments.
 - [ ] Reorder the sidebar: selected stop placeholder first, then route controls, then route summary, then segment list.
