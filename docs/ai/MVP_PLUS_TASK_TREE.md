@@ -149,3 +149,20 @@ These items are intentionally postponed until after the current shape-geometry M
 - [ ] Check public API limits and acceptable usage policies.
 - [ ] Design geocoding-to-nearest-stop flow.
 - [ ] Decide whether geocoding belongs in product roadmap or remains an experiment.
+
+### Story 8.7 — GTFS model normalization tech debt
+
+Current state: `connections` is an internal routing graph projection. For MVP+, it also stores minimal GTFS metadata directly on each edge so route geometry can resolve the matching `shapes.txt` slice.
+
+This is acceptable for the mini dataset and shape-geometry MVP+, but it should not become the final GTFS storage model.
+
+#### Task 8.7.1 — Design normalized GTFS storage
+- [ ] Design `gtfs_routes`, `gtfs_trips`, `gtfs_stop_times`, and related source-of-truth tables.
+- [ ] Keep `connections` / graph edges as a derived routing projection, not the only GTFS storage.
+- [ ] Include dataset/import generation identifiers for future full/scheduled imports.
+- [ ] Decide how route metadata, calendar/service data, and realtime updates link to routing edges.
+
+#### Task 8.7.2 — Migration plan
+- [ ] Define how to backfill or rebuild `connections` from normalized GTFS tables.
+- [ ] Decide whether GTFS metadata columns remain on `connections` as denormalized cache fields or move behind joins.
+- [ ] Revisit this before implementing full BKK scheduled import.

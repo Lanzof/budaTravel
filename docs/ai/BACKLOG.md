@@ -136,3 +136,9 @@
 - [ ] Check whether BKK realtime is protobuf-over-HTTP or actual gRPC.
 - [ ] Research OpenStreetMap geocoding options: Nominatim, Photon, Pelias-like services.
 - [ ] Design address/place search -> nearest stop flow for a later stage.
+
+### Story 8.7 — GTFS model normalization tech debt
+- [ ] Design normalized GTFS source-of-truth tables for routes, trips, stop times, calendars, and dataset generations.
+- [ ] Keep `connections` as a derived routing graph/projection.
+- [ ] Revisit direct GTFS metadata fields on `connections` before full BKK scheduled import.
+- [ ] Decide whether connection GTFS metadata remains as denormalized cache or moves behind joins.

@@ -35,6 +35,11 @@ data class Connection(
     val carrier: String,
     val type: String,
 
+    // Minimal GTFS metadata copied onto the routing edge.
+    // `Connection` is our internal graph projection, not a full GTFS model.
+    // These fields let the route response resolve the matching slice of `shapes.txt`.
+    // Tech debt: when full/scheduled imports arrive, introduce normalized GTFS tables
+    // (`gtfs_trips`, `gtfs_routes`, `gtfs_stop_times`) and keep connections as a derived graph.
     @Column(name = "trip_id")
     val tripId: String? = null,
 
