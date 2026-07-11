@@ -302,6 +302,29 @@ class ApiApplicationTests {
     }
 
     @Test
+    fun `GET locations autocomplete should ignore accents`() {
+        locationRepo.save(
+            Location(
+                stopId = "F00985",
+                name = "Deák Ferenc tér M",
+                lat = 47.497701,
+                lon = 19.053353,
+            )
+        )
+
+        val response = restTemplate.exchange(
+            "http://localhost:$port/api/v1/locations/autocomplete?q=Deak&limit=10",
+            HttpMethod.GET,
+            null,
+            LOCATION_SUGGESTION_LIST_TYPE
+        )
+
+        assertEquals(HttpStatus.OK, response.statusCode)
+        assertEquals(1, response.body!!.size)
+        assertEquals("F00985", response.body!!.first().stopId)
+    }
+
+    @Test
     fun `GET locations autocomplete should cap limit to 50`() {
         val locations = (1..60).map {
             Location(

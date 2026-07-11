@@ -50,6 +50,12 @@ Primary scenario:
 - [x] Support selecting a suggestion.
 - [x] Preserve stop ID visibility for debugging.
 
+#### Task 8.2.1.1 — Accent-insensitive stop search
+- [x] Add normalized stop name storage for search without production backfill.
+- [x] Normalize imported stop names by lowercasing, removing diacritics, and collapsing separators.
+- [x] Search autocomplete by normalized query so `Deak Ferenc` can match `Deák Ferenc`.
+- [x] Keep this as a Postgres-local MVP solution before considering trigram/OpenSearch.
+
 #### Task 8.2.2 — Map selection
 - [x] Allow clicking a stop marker to set origin or destination.
 - [x] Highlight selected origin/destination markers.
