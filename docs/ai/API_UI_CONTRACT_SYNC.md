@@ -22,7 +22,7 @@ Response item shape:
 ```json
 {
   "stopId": "F00985",
-  "name": "Deak Ferenc ter M",
+  "name": "Deák Ferenc tér M",
   "lat": 47.497701,
   "lon": 19.053353
 }
@@ -39,6 +39,8 @@ Notes:
 ```http
 GET /api/v1/locations/autocomplete?q=deak&limit=10
 ```
+
+Autocomplete search is accent-insensitive: user input and imported stop names are normalized before lookup, so `Deak Ferenc` can match `Deák Ferenc`. The current MVP implementation stores a derived `location.name_normalized` value in Postgres instead of introducing a separate search engine. The project is still pre-production, so the migration assumes a fresh local/demo database and does not backfill old rows.
 
 Response item shape is the same minimal stop shape:
 

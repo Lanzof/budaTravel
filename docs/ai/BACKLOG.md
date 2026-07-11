@@ -103,6 +103,7 @@
 
 ### Story 8.2 — Better route selection UX
 - [x] Add stop search/autocomplete to choose origin and destination.
+- [x] Support accent-insensitive stop search through derived `name_normalized` storage.
 - [x] Support selecting stops from the map.
 - [x] Keep the demo route button as a regression/sanity shortcut.
 - [x] Show route details in a readable way, not only a line on the map.

@@ -8,7 +8,7 @@ import java.util.*
 @Repository
 interface LocationRepo : JpaRepository<Location, UUID> {
 
-    fun findByNameContainingIgnoreCase(name: String): List<Location>
+    fun findByNormalizedNameContaining(normalizedName: String): List<Location>
     fun findByStopId(stopId: String): List<Location>
 
 }

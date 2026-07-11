@@ -5,6 +5,7 @@ import io.lanzof.api.exception.LocationNotFoundException
 import io.lanzof.api.dto.ApiErrorResponse
 import io.lanzof.core.entity.Location
 import io.lanzof.core.repo.LocationRepo
+import io.lanzof.core.search.LocationSearchNormalizer
 import io.lanzof.dto.LocationDto
 import io.lanzof.dto.LocationSuggestionDto
 import io.swagger.v3.oas.annotations.Operation
@@ -48,7 +49,9 @@ class LocationController(
         @RequestParam(defaultValue = "10") @Positive limit: Int,
     ): List<LocationSuggestionDto> {
         val effectiveLimit = minOf(limit, 50)
-        return locationRepo.findByNameContainingIgnoreCase(q)
+        val normalizedQuery = normalizeQuery(q)
+
+        return locationRepo.findByNormalizedNameContaining(normalizedQuery)
             .take(effectiveLimit)
             .map { it.toSuggestionDto() }
     }
@@ -101,7 +104,7 @@ class LocationController(
         validateBoundingBox(minLat, maxLat, minLon, maxLon)
 
         val locations = when {
-            q != null -> locationRepo.findByNameContainingIgnoreCase(q)
+            q != null -> locationRepo.findByNormalizedNameContaining(normalizeQuery(q))
             stopId != null -> locationRepo.findByStopId(stopId)
             else -> locationRepo.findAll()
         }
@@ -113,6 +116,14 @@ class LocationController(
             .take(limit)
             .map { it.toDto() }
             .toList()
+    }
+
+    private fun normalizeQuery(query: String): String {
+        val normalizedQuery = LocationSearchNormalizer.normalize(query)
+        if (normalizedQuery.isBlank()) {
+            throw InvalidQueryParametersException("Search query must contain letters or digits.")
+        }
+        return normalizedQuery
     }
 
     private fun validateBoundingBox(minLat: Double?, maxLat: Double?, minLon: Double?, maxLon: Double?) {

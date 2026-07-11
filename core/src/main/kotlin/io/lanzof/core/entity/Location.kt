@@ -1,5 +1,7 @@
 package io.lanzof.core.entity
 
+import io.lanzof.core.search.LocationSearchNormalizer
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
@@ -16,6 +18,10 @@ data class Location(
 
     val stopId: String,
     val name: String,
+
+    @Column(name = "name_normalized", nullable = false)
+    val normalizedName: String = LocationSearchNormalizer.normalize(name),
+
     val lat: Double,
     val lon: Double,
 )
