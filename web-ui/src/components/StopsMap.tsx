@@ -214,37 +214,44 @@ export function StopsMap() {
 
   return (
     <>
-      <section className="demo-toolbar" aria-label="Demo status and shortcuts">
-        <div className="demo-toolbar-copy">
-          <p className="eyebrow">budaTravel MVP</p>
-          <h2>Stops in current map view</h2>
-          <p className="muted">
-            The UI calls <code>/api/v1/locations</code> with the visible map bounding box and renders the returned stops as
-            Leaflet points.
+      <header className="hero-header">
+        <div className="hero-copy">
+          <p className="eyebrow">Budapest transport demo</p>
+          <h1>budaTravel map MVP</h1>
+          <p>
+            Minimal web UI for exploring stops imported from the backend demo dataset. Move the map to request a fresh
+            bounding box from the API.
           </p>
         </div>
 
-        <dl className="stats-grid demo-stats">
-          <div>
-            <dt>Loaded stops</dt>
-            <dd>{locations.length}</dd>
+        <section className="hero-status-panel" aria-label="Demo status and shortcuts">
+          <div className="hero-endpoint-note">
+            <p className="eyebrow">Debug panel</p>
+            <strong>Demo runtime status</strong>
           </div>
-          <div>
-            <dt>Status</dt>
-            <dd>{isLoading ? 'Loading' : 'Idle'}</dd>
-          </div>
-        </dl>
 
-        <button type="button" className="secondary-action demo-action" onClick={useDemoRoute}>
-          Use demo route
-        </button>
+          <dl className="stats-grid hero-stats">
+            <div>
+              <dt>Loaded stops</dt>
+              <dd>{locations.length}</dd>
+            </div>
+            <div>
+              <dt>Status</dt>
+              <dd>{isLoading ? 'Loading' : 'Idle'}</dd>
+            </div>
+          </dl>
 
-        {error ? (
-          <div className="notice error demo-error" role="alert">
-            Backend is not reachable yet: {error}. Start the API locally and keep this page open.
-          </div>
-        ) : null}
-      </section>
+          <button type="button" className="secondary-action demo-action" onClick={useDemoRoute}>
+            Use demo route
+          </button>
+
+          {error ? (
+            <div className="notice error hero-error" role="alert">
+              Backend is not reachable yet: {error}. Start the API locally and keep this page open.
+            </div>
+          ) : null}
+        </section>
+      </header>
 
       <section className="map-shell" aria-label="Budapest stops map">
         <div className="map-panel">
