@@ -35,14 +35,45 @@
   text-transform: uppercase;
 }
 
+.demo-toolbar {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) auto auto;
+  align-items: center;
+  gap: 16px;
+  margin: 0 clamp(16px, 4vw, 56px) 20px;
+  border: 1px solid rgba(23, 32, 51, 0.1);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 18px 56px rgba(30, 58, 138, 0.12);
+  padding: 18px;
+}
+
+.demo-toolbar-copy h2 {
+  margin: 6px 0 8px;
+  color: #111827;
+  font-size: 1.2rem;
+}
+
+.demo-stats {
+  min-width: 250px;
+}
+
+.demo-action {
+  white-space: nowrap;
+}
+
+.demo-error {
+  grid-column: 1 / -1;
+}
+
 .map-shell {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 360px;
   gap: 20px;
   padding: 0 clamp(16px, 4vw, 56px) 40px;
   align-items: stretch;
-  height: calc(100vh - 180px);
-  min-height: 620px;
+  height: calc(100vh - 300px);
+  min-height: 540px;
 }
 
 .map-panel,
@@ -100,7 +131,9 @@ code {
 
 .stats-grid div,
 .notice,
-.selected-card {
+.selected-card,
+.route-summary-card,
+.route-segments-card {
   border: 1px solid rgba(37, 99, 235, 0.16);
   border-radius: 18px;
   background: #f8fbff;
@@ -137,7 +170,23 @@ code {
   color: #475569;
 }
 
+.selected-card-placeholder {
+  min-height: 190px;
+}
+
+.empty-stop-state h3 {
+  margin-top: 8px;
+}
+
 @media (max-width: 960px) {
+  .demo-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .demo-stats {
+    min-width: 0;
+  }
+
   .map-shell {
     grid-template-columns: 1fr;
   }
@@ -172,6 +221,10 @@ code {
   .map {
     min-height: 420px;
     height: 420px;
+  }
+
+  .demo-toolbar {
+    margin-bottom: 16px;
   }
 
   .sidebar {
