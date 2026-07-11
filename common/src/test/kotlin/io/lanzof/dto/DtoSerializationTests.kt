@@ -77,8 +77,47 @@ class DtoSerializationTests {
     }
 
     @Test
-    fun `route response deserializes nested segment structure`() {
-        val json = """
+    fun `route response serializes with nested segment structure`() {
+        val response = RouteResponse(
+            totalDuration = Duration.ofMinutes(90),
+            totalPrice = BigDecimal("12.50"),
+            segments = listOf(
+                RouteSegment(
+                    from = RouteStop(
+                        stopId = "STOP_A",
+                        name = "Budapest, Stop A",
+                        lat = 47.4979,
+                        lon = 19.0402,
+                    ),
+                    to = RouteStop(
+                        stopId = "STOP_B",
+                        name = "Budapest, Stop B",
+                        lat = 47.4985,
+                        lon = 19.0450,
+                    ),
+                    timing = RouteSegmentTiming(
+                        departureTime = OffsetDateTime.parse("2025-01-10T14:30:00+01:00"),
+                        arrivalTime = OffsetDateTime.parse("2025-01-10T14:50:00+01:00"),
+                    ),
+                    transport = RouteTransport(
+                        carrier = "BKK",
+                        type = TransportType.BUS,
+                        routeId = "0160",
+                    ),
+                    gtfs = GtfsSegmentMetadata(
+                        tripId = "D075211",
+                        shapeId = "CB58",
+                        fromStopSequence = 1,
+                        toStopSequence = 2,
+                    ),
+                    geometry = listOf(
+                        RouteGeometryPoint(47.4979, 19.0402),
+                        RouteGeometryPoint(47.4985, 19.0450),
+                    ),
+                )
+            )
+        )
+        val expectedJson = """
             {
               "totalDuration": "PT1H30M",
               "totalPrice": 12.50,
@@ -94,7 +133,7 @@ class DtoSerializationTests {
                     "stopId": "STOP_B",
                     "name": "Budapest, Stop B",
                     "lat": 47.4985,
-                    "lon": 19.0450
+                    "lon": 19.045
                   },
                   "timing": {
                     "departureTime": "2025-01-10T14:30:00+01:00",
@@ -113,46 +152,17 @@ class DtoSerializationTests {
                   },
                   "geometry": [
                     { "lat": 47.4979, "lon": 19.0402 },
-                    { "lat": 47.4985, "lon": 19.0450 }
+                    { "lat": 47.4985, "lon": 19.045 }
                   ]
                 }
               ]
             }
         """.trimIndent()
 
-        val parsed: RouteResponse = objectMapper.readValue(json)
+        val actual = objectMapper.readTree(objectMapper.writeValueAsString(response))
+        val expected = objectMapper.readTree(expectedJson)
 
-        assertEquals(Duration.ofMinutes(90), parsed.totalDuration)
-        assertEquals(BigDecimal("12.50"), parsed.totalPrice)
-        assertEquals(1, parsed.segments.size)
-
-        val segment = parsed.segments.single()
-        assertEquals(RouteStop("STOP_A", "Budapest, Stop A", 47.4979, 19.0402), segment.from)
-        assertEquals(RouteStop("STOP_B", "Budapest, Stop B", 47.4985, 19.0450), segment.to)
-        assertEquals(
-            RouteSegmentTiming(
-                departureTime = OffsetDateTime.parse("2025-01-10T14:30:00+01:00"),
-                arrivalTime = OffsetDateTime.parse("2025-01-10T14:50:00+01:00"),
-            ),
-            segment.timing,
-        )
-        assertEquals(RouteTransport("BKK", TransportType.BUS, "0160"), segment.transport)
-        assertEquals(
-            GtfsSegmentMetadata(
-                tripId = "D075211",
-                shapeId = "CB58",
-                fromStopSequence = 1,
-                toStopSequence = 2,
-            ),
-            segment.gtfs,
-        )
-        assertEquals(
-            listOf(
-                RouteGeometryPoint(47.4979, 19.0402),
-                RouteGeometryPoint(47.4985, 19.0450),
-            ),
-            segment.geometry,
-        )
+        assertEquals(expected, actual)
     }
 
     @Test
