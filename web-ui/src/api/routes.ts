@@ -9,6 +9,11 @@ export interface RouteSearchRequest {
   transportTypes: TransportType[]
 }
 
+export interface RouteGeometryPointDto {
+  lat: number
+  lon: number
+}
+
 export interface RouteSegmentDto {
   fromStopId: string
   toStopId: string
@@ -22,6 +27,7 @@ export interface RouteSegmentDto {
   arrivalTime: string
   carrier: string
   type: TransportType
+  geometry?: RouteGeometryPointDto[]
 }
 
 export interface RouteResponseDto {

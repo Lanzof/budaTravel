@@ -20,27 +20,27 @@ Primary scenario:
 - [x] Identify demo route shape: `D075211` -> `CB58`.
 
 #### Task 8.1.2 — Extend GTFS import metadata
-- [ ] Add `shape_id` to GTFS trip parsing.
-- [ ] Add `shape_dist_traveled` to GTFS stop-time parsing.
-- [ ] Build `trip_id -> route_id/shape_id` metadata during import.
-- [ ] Store trip/shape metadata on generated connections.
+- [x] Add `shape_id` to GTFS trip parsing.
+- [x] Add `shape_dist_traveled` to GTFS stop-time parsing.
+- [x] Build `trip_id -> route_id/shape_id` metadata during import.
+- [x] Store trip/shape metadata on generated connections.
 
 #### Task 8.1.3 — Persist shape points
-- [ ] Add migration for `gtfs_shape_points`.
-- [ ] Add entity/repository for shape points.
-- [ ] Import `shapes.txt` points from mini archive.
-- [ ] Add indexes by `shape_id + sequence` and `shape_id + distance`.
+- [x] Add migration for `gtfs_shape_points`.
+- [x] Add entity/repository for shape points.
+- [x] Import `shapes.txt` points from mini archive.
+- [x] Add indexes by `shape_id + sequence` and `shape_id + distance`.
 
 #### Task 8.1.4 — Resolve geometry in backend
-- [ ] Query shape points for a connection by `shape_id` and distance range.
-- [ ] Add fallback to stop endpoints when shape geometry is missing.
-- [ ] Extend route DTO with optional geometry points.
-- [ ] Add tests for the known demo route geometry.
+- [x] Query shape points for a connection by `shape_id` and distance range.
+- [x] Add fallback to stop endpoints when shape geometry is missing.
+- [x] Extend route DTO with optional geometry points.
+- [x] Add tests for shape geometry resolution.
 
 #### Task 8.1.5 — Render geometry in web UI
-- [ ] Prefer backend geometry when present.
-- [ ] Keep current stop-to-stop polyline fallback.
-- [ ] Verify demo route no longer visually cuts through the Danube.
+- [x] Prefer backend geometry when present.
+- [x] Keep current stop-to-stop polyline fallback.
+- [x] Verify demo route no longer visually cuts through the Danube in local Docker demo.
 
 ### Story 8.2 — Better route selection UX
 
@@ -106,6 +106,7 @@ Primary scenario:
 
 #### Task 8.5.1 — Docker smoke test
 - [ ] Add a scripted smoke test for Docker Compose demo startup.
+- [x] Manually verify Docker Compose demo startup and demo route rendering after shape geometry implementation.
 - [ ] Check API readiness.
 - [ ] Check web UI is reachable.
 - [ ] Optionally call demo route API.
@@ -131,3 +132,37 @@ Primary scenario:
 6. Ingestor source profiles and provider abstraction.
 7. Scheduled import design/implementation.
 8. E2E smoke/demo polish.
+
+
+### Story 8.6 — Next-stage realtime and geocoding experiments
+
+These items are intentionally postponed until after the current shape-geometry MVP+ work.
+
+#### Task 8.6.1 — BKK realtime research
+- [ ] Research BKK GTFS-Realtime endpoints and response formats.
+- [ ] Determine whether BKK exposes protobuf-over-HTTP feeds or actual gRPC services.
+- [ ] Evaluate live vehicle positions as a WebClient/WebFlux + SSE experiment.
+- [ ] Decide whether realtime positions should be rendered on the map.
+
+#### Task 8.6.2 — OSM geocoding research
+- [ ] Compare Nominatim, Photon, and Pelias-like geocoding options for Budapest address/place search.
+- [ ] Check public API limits and acceptable usage policies.
+- [ ] Design geocoding-to-nearest-stop flow.
+- [ ] Decide whether geocoding belongs in product roadmap or remains an experiment.
+
+### Story 8.7 — GTFS model normalization tech debt
+
+Current state: `connections` is an internal routing graph projection. For MVP+, it also stores minimal GTFS metadata directly on each edge so route geometry can resolve the matching `shapes.txt` slice.
+
+This is acceptable for the mini dataset and shape-geometry MVP+, but it should not become the final GTFS storage model.
+
+#### Task 8.7.1 — Design normalized GTFS storage
+- [ ] Design `gtfs_routes`, `gtfs_trips`, `gtfs_stop_times`, and related source-of-truth tables.
+- [ ] Keep `connections` / graph edges as a derived routing projection, not the only GTFS storage.
+- [ ] Include dataset/import generation identifiers for future full/scheduled imports.
+- [ ] Decide how route metadata, calendar/service data, and realtime updates link to routing edges.
+
+#### Task 8.7.2 — Migration plan
+- [ ] Define how to backfill or rebuild `connections` from normalized GTFS tables.
+- [ ] Decide whether GTFS metadata columns remain on `connections` as denormalized cache fields or move behind joins.
+- [ ] Revisit this before implementing full BKK scheduled import.

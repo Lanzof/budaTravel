@@ -1,8 +1,10 @@
 package io.lanzof.core.service
 
 import io.lanzof.core.entity.Connection
+import io.lanzof.core.entity.GtfsShapePoint
 import io.lanzof.core.entity.Location
 import io.lanzof.core.repo.ConnectionRepo
+import io.lanzof.core.repo.GtfsShapePointRepo
 import io.lanzof.core.repo.LocationRepo
 import io.lanzof.dto.RouteOptimization
 import io.lanzof.dto.TransportType
@@ -21,7 +23,8 @@ import java.util.UUID
 class RoutingServiceImplTest {
     private val locationRepo = mock(LocationRepo::class.java)
     private val connectionRepo = mock(ConnectionRepo::class.java)
-    private val routingService = RoutingServiceImpl(locationRepo, connectionRepo)
+    private val shapePointRepo = mock(GtfsShapePointRepo::class.java)
+    private val routingService = RoutingServiceImpl(locationRepo, connectionRepo, shapePointRepo)
 
     @Test
     fun `fastest best-first picks fastest valid branch and ignores over-transfer branch`() {
@@ -96,6 +99,51 @@ class RoutingServiceImplTest {
     }
 
     @Test
+    fun `route response uses shape geometry when connection has GTFS shape metadata`() {
+        val a = stop("A", lat = 47.0, lon = 19.0)
+        val b = stop("B", lat = 48.0, lon = 20.0)
+        val start = t("2026-01-26T08:00:00+01:00")
+        val shapedConnection = Connection(
+            id = UUID.randomUUID(),
+            fromLocation = a,
+            toLocation = b,
+            departureTime = t("2026-01-26T08:00:00+01:00"),
+            arrivalTime = t("2026-01-26T08:10:00+01:00"),
+            price = BigDecimal.ZERO,
+            carrier = "BKK",
+            type = "BUS",
+            tripId = "trip-1",
+            routeId = "route-1",
+            shapeId = "shape-1",
+            fromStopSequence = 1,
+            toStopSequence = 2,
+            fromShapeDistTraveled = 0.0,
+            toShapeDistTraveled = 20.0,
+        )
+
+        stubStops(a, b)
+        stubNext(a, start, listOf(shapedConnection))
+        `when`(
+            shapePointRepo.findByShapeIdAndShapeDistTraveledBetweenOrderByShapeDistTraveledAscShapePtSequenceAsc(
+                "shape-1",
+                0.0,
+                20.0,
+            )
+        ).thenReturn(
+            listOf(
+                GtfsShapePoint(shapeId = "shape-1", shapePtSequence = 1, lat = 47.1, lon = 19.1, shapeDistTraveled = 1.0),
+                GtfsShapePoint(shapeId = "shape-1", shapePtSequence = 2, lat = 47.2, lon = 19.2, shapeDistTraveled = 10.0),
+            )
+        )
+
+        val responses = routingService.toRouteResponses(routingService.findRoutes("A", "B", start))
+
+        assertEquals(2, responses.first().segments.first().geometry.size)
+        assertEquals(47.1, responses.first().segments.first().geometry.first().lat)
+        assertEquals(19.2, responses.first().segments.first().geometry.last().lon)
+    }
+
+    @Test
     fun `routing uses repository next-hop query and not full dump`() {
         val a = stop("A")
         val b = stop("B")
@@ -126,13 +174,13 @@ class RoutingServiceImplTest {
         ).thenReturn(connections)
     }
 
-    private fun stop(id: String): Location {
+    private fun stop(id: String, lat: Double = 47.0, lon: Double = 19.0): Location {
         return Location(
             id = UUID.randomUUID(),
             stopId = id,
             name = "Stop $id",
-            lat = 47.0,
-            lon = 19.0,
+            lat = lat,
+            lon = lon,
         )
     }
 

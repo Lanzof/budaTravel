@@ -1,5 +1,6 @@
 package io.lanzof.core.entity
 
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
@@ -32,5 +33,31 @@ data class Connection(
 
     val price: BigDecimal,
     val carrier: String,
-    val type: String
+    val type: String,
+
+    // Minimal GTFS metadata copied onto the routing edge.
+    // `Connection` is our internal graph projection, not a full GTFS model.
+    // These fields let the route response resolve the matching slice of `shapes.txt`.
+    // Tech debt: when full/scheduled imports arrive, introduce normalized GTFS tables
+    // (`gtfs_trips`, `gtfs_routes`, `gtfs_stop_times`) and keep connections as a derived graph.
+    @Column(name = "trip_id")
+    val tripId: String? = null,
+
+    @Column(name = "route_id")
+    val routeId: String? = null,
+
+    @Column(name = "shape_id")
+    val shapeId: String? = null,
+
+    @Column(name = "from_stop_sequence")
+    val fromStopSequence: Int? = null,
+
+    @Column(name = "to_stop_sequence")
+    val toStopSequence: Int? = null,
+
+    @Column(name = "from_shape_dist_traveled")
+    val fromShapeDistTraveled: Double? = null,
+
+    @Column(name = "to_shape_dist_traveled")
+    val toShapeDistTraveled: Double? = null,
 )

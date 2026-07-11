@@ -22,5 +22,11 @@ data class RouteSegment(
     val departureTime: OffsetDateTime,
     val arrivalTime: OffsetDateTime,
     val carrier: String,
-    val type: TransportType
+    val type: TransportType,
+    val geometry: List<RouteGeometryPoint> = emptyList(),
+)
+
+data class RouteGeometryPoint(
+    val lat: Double,
+    val lon: Double,
 )

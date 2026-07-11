@@ -5,11 +5,15 @@ import com.fasterxml.jackson.databind.MappingIterator
 import com.fasterxml.jackson.dataformat.csv.CsvMapper
 import com.fasterxml.jackson.dataformat.csv.CsvSchema
 import io.lanzof.core.entity.Connection
+import io.lanzof.core.entity.GtfsShapePoint as ShapePointEntity
 import io.lanzof.core.entity.Location
 import io.lanzof.core.repo.ConnectionRepo
+import io.lanzof.core.repo.GtfsShapePointRepo
 import io.lanzof.core.repo.LocationRepo
+import io.lanzof.ingestor.gtfs.GtfsShapePoint
 import io.lanzof.ingestor.gtfs.GtfsStop
 import io.lanzof.ingestor.gtfs.GtfsStopTime
+import io.lanzof.ingestor.gtfs.GtfsTrip
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.io.File
@@ -26,11 +30,11 @@ import java.util.zip.ZipFile
 @Service
 class GtfsService(
     private val locationRepo: LocationRepo,
-    private val connectionRepo: ConnectionRepo
+    private val connectionRepo: ConnectionRepo,
+    private val shapePointRepo: GtfsShapePointRepo,
 ) {
     private val logger = LoggerFactory.getLogger(GtfsService::class.java)
     private val csvMapper = CsvMapper().apply {
-        // Настройка: первая строка - это заголовок
         findAndRegisterModules()
         disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
     }
@@ -59,37 +63,85 @@ class GtfsService(
 
         val locationsToSave = mutableListOf<Location>()
 
-        // Читаем CSV построчно
         val iterator: MappingIterator<GtfsStop> =
             csvMapper.readerFor(GtfsStop::class.java).with(schema).readValues(inputStream)
 
         var count = 0
         iterator.forEach { gtfsStop ->
-            // Маппим GTFS модель в нашу Entity
             val location = Location(
                 stopId = gtfsStop.stop_id,
                 name = gtfsStop.stop_name,
-                lat = gtfsStop.stop_lat, // Убедись, что в Entity lat/lon Double (или конвертируй)
-                lon = gtfsStop.stop_lon
+                lat = gtfsStop.stop_lat,
+                lon = gtfsStop.stop_lon,
             )
             locationsToSave.add(location)
             count++
 
-            // Пакетная запись каждые 1000 штук, чтобы не забить память
-            if (count % 1000 == 0) {
+            if (count % BATCH_SIZE == 0) {
                 locationRepo.saveAll(locationsToSave)
                 locationsToSave.clear()
                 logger.info("Processed $count stops...")
             }
         }
 
-        // Сохраняем остаток
         if (locationsToSave.isNotEmpty()) {
             locationRepo.saveAll(locationsToSave)
         }
 
         zipFile.close()
         logger.info("Import finished! Total stops: $count")
+    }
+
+    fun importShapesFromZip(zipFilePath: String) {
+        logger.info("Starting Shapes import from: $zipFilePath")
+
+        val file = File(zipFilePath)
+        if (!file.exists()) {
+            logger.error("File not found: $zipFilePath")
+            return
+        }
+
+        ZipFile(file).use { zipFile ->
+            val shapesEntry = zipFile.getEntry("shapes.txt")
+                ?: run {
+                    logger.warn("shapes.txt not found; route geometry will fall back to stop-to-stop lines")
+                    return
+                }
+
+            val schema = CsvSchema.emptySchema().withHeader()
+            val shapePointsToSave = mutableListOf<ShapePointEntity>()
+            var count = 0
+
+            csvMapper
+                .readerFor(GtfsShapePoint::class.java)
+                .with(schema)
+                .readValues<GtfsShapePoint>(zipFile.getInputStream(shapesEntry))
+                .asSequence()
+                .forEach { point ->
+                    shapePointsToSave.add(
+                        ShapePointEntity(
+                            shapeId = point.shape_id,
+                            shapePtSequence = point.shape_pt_sequence,
+                            lat = point.shape_pt_lat,
+                            lon = point.shape_pt_lon,
+                            shapeDistTraveled = point.shape_dist_traveled,
+                        )
+                    )
+                    count++
+
+                    if (count % BATCH_SIZE == 0) {
+                        shapePointRepo.saveAll(shapePointsToSave)
+                        shapePointsToSave.clear()
+                        logger.info("Processed $count shape points...")
+                    }
+                }
+
+            if (shapePointsToSave.isNotEmpty()) {
+                shapePointRepo.saveAll(shapePointsToSave)
+            }
+
+            logger.info("Import Shapes finished! Total shape points: $count")
+        }
     }
 
     fun importStopTimesFromZip(zipFilePath: String, carrierName: String) {
@@ -108,9 +160,10 @@ class GtfsService(
                     return
                 }
             val serviceDate = resolveServiceDate(zipFile)
+            val tripMetadataById = readTripMetadata(zipFile)
             logger.info("Resolved GTFS service date: $serviceDate")
+            logger.info("Loaded ${tripMetadataById.size} GTFS trips with metadata")
 
-            // Оптимизация: загружаем все локации в Map ОДИН раз, чтобы не делать N+1 запросов в цикле
             val locationMap = locationRepo.findAll()
                 .associateBy { it.stopId }
 
@@ -126,13 +179,18 @@ class GtfsService(
                 .readerFor(GtfsStopTime::class.java)
                 .with(schema)
                 .readValues<GtfsStopTime>(inputStream)
-                .asSequence() // Используем Sequence для ленивой итерации
+                .asSequence()
                 .forEach { stopTime ->
-
-                    // Если ID поездки сменился, обрабатываем накопленный буфер
                     if (stopTime.trip_id != currentTripId) {
                         if (tripBuffer.isNotEmpty()) {
-                            processTrip(tripBuffer, carrierName, serviceDate, locationMap, connectionsToSave)
+                            processTrip(
+                                stops = tripBuffer,
+                                carrier = carrierName,
+                                serviceDate = serviceDate,
+                                locationMap = locationMap,
+                                tripMetadata = tripMetadataById[currentTripId],
+                                buffer = connectionsToSave,
+                            )
                             tripBuffer.clear()
 
                             tripsProcessed++
@@ -148,12 +206,17 @@ class GtfsService(
                     tripBuffer.add(stopTime)
                 }
 
-            // Обрабатываем последнюю поездку в файле
             if (tripBuffer.isNotEmpty()) {
-                processTrip(tripBuffer, carrierName, serviceDate, locationMap, connectionsToSave)
+                processTrip(
+                    stops = tripBuffer,
+                    carrier = carrierName,
+                    serviceDate = serviceDate,
+                    locationMap = locationMap,
+                    tripMetadata = tripMetadataById[currentTripId],
+                    buffer = connectionsToSave,
+                )
             }
 
-            // Сохраняем оставшийся батч
             if (connectionsToSave.isNotEmpty()) {
                 connectionRepo.saveAll(connectionsToSave)
             }
@@ -166,18 +229,16 @@ class GtfsService(
         stops: List<GtfsStopTime>,
         carrier: String,
         serviceDate: LocalDate,
-        locationMap: Map<String, Location>, // Передаем карту вместо репозитория
-        buffer: MutableList<Connection>
+        locationMap: Map<String, Location>,
+        tripMetadata: TripMetadata?,
+        buffer: MutableList<Connection>,
     ) {
-        // Сортируем остановки по порядку (на случай, если в файле они перемешаны)
         val sortedStops = stops.sortedBy { it.stop_sequence }
 
-        // Идем парами: i -> i+1
         for (i in 0 until sortedStops.size - 1) {
             val from = sortedStops[i]
             val to = sortedStops[i + 1]
 
-            // Достаем локации из Map (O(1)), а не из БД (О(N))
             val fromLoc = locationMap[from.stop_id]
             val toLoc = locationMap[to.stop_id]
 
@@ -187,13 +248,42 @@ class GtfsService(
                     toLocation = toLoc,
                     departureTime = parseGtfsTime(from.departure_time, serviceDate),
                     arrivalTime = parseGtfsTime(to.arrival_time, serviceDate),
-                    price = BigDecimal.ZERO, // В GTFS цен нет
+                    price = BigDecimal.ZERO,
                     carrier = carrier,
-                    type = "PUBLIC_TRANSPORT"
+                    type = "PUBLIC_TRANSPORT",
+                    tripId = from.trip_id,
+                    routeId = tripMetadata?.routeId,
+                    shapeId = tripMetadata?.shapeId,
+                    fromStopSequence = from.stop_sequence,
+                    toStopSequence = to.stop_sequence,
+                    fromShapeDistTraveled = from.shape_dist_traveled,
+                    toShapeDistTraveled = to.shape_dist_traveled,
                 )
                 buffer.add(conn)
             }
         }
+    }
+
+    private fun readTripMetadata(zipFile: ZipFile): Map<String, TripMetadata> {
+        val tripsEntry = zipFile.getEntry("trips.txt")
+            ?: run {
+                logger.warn("trips.txt not found; route geometry will not have trip/shape metadata")
+                return emptyMap()
+            }
+
+        val schema = CsvSchema.emptySchema().withHeader()
+        return csvMapper
+            .readerFor(GtfsTrip::class.java)
+            .with(schema)
+            .readValues<GtfsTrip>(zipFile.getInputStream(tripsEntry))
+            .asSequence()
+            .associate { trip ->
+                trip.trip_id to TripMetadata(
+                    tripId = trip.trip_id,
+                    routeId = trip.route_id,
+                    shapeId = trip.shape_id,
+                )
+            }
     }
 
     // MVP/demo simplification: budapest-mini.zip contains one service_id and one active
@@ -250,5 +340,15 @@ class GtfsService(
             .atZone(ZoneId.of("Europe/Budapest"))
             .toOffsetDateTime()
             .plusDays(daysToAdd.toLong())
+    }
+
+    private data class TripMetadata(
+        val tripId: String,
+        val routeId: String,
+        val shapeId: String?,
+    )
+
+    companion object {
+        private const val BATCH_SIZE = 1_000
     }
 }

@@ -2,7 +2,9 @@ package io.lanzof.core.service
 
 import io.lanzof.core.entity.Connection
 import io.lanzof.core.repo.ConnectionRepo
+import io.lanzof.core.repo.GtfsShapePointRepo
 import io.lanzof.core.repo.LocationRepo
+import io.lanzof.dto.RouteGeometryPoint
 import io.lanzof.dto.RouteOptimization
 import io.lanzof.dto.RouteResponse
 import io.lanzof.dto.RouteSegment
@@ -18,6 +20,7 @@ import java.util.PriorityQueue
 class RoutingServiceImpl(
     private val locationRepo: LocationRepo,
     private val connectionRepo: ConnectionRepo,
+    private val shapePointRepo: GtfsShapePointRepo,
 ) : RoutingService {
     override fun findRoutes(
         originStopId: String,
@@ -127,10 +130,37 @@ class RoutingServiceImpl(
                         arrivalTime = segment.arrivalTime,
                         carrier = segment.carrier,
                         type = normalizeTransportType(segment.type) ?: TransportType.BUS,
+                        geometry = resolveGeometry(segment),
                     )
                 }
             )
         }
+    }
+
+    private fun resolveGeometry(segment: Connection): List<RouteGeometryPoint> {
+        val shapeId = segment.shapeId ?: return fallbackGeometry(segment)
+        val fromDistance = segment.fromShapeDistTraveled ?: return fallbackGeometry(segment)
+        val toDistance = segment.toShapeDistTraveled ?: return fallbackGeometry(segment)
+
+        val start = minOf(fromDistance, toDistance)
+        val end = maxOf(fromDistance, toDistance)
+        val shapePoints = shapePointRepo
+            .findByShapeIdAndShapeDistTraveledBetweenOrderByShapeDistTraveledAscShapePtSequenceAsc(
+                shapeId = shapeId,
+                fromDistance = start,
+                toDistance = end,
+            )
+            .map { point -> RouteGeometryPoint(lat = point.lat, lon = point.lon) }
+            .let { points -> if (fromDistance <= toDistance) points else points.asReversed() }
+
+        return shapePoints.ifEmpty { fallbackGeometry(segment) }
+    }
+
+    private fun fallbackGeometry(segment: Connection): List<RouteGeometryPoint> {
+        return listOf(
+            RouteGeometryPoint(segment.fromLocation.lat, segment.fromLocation.lon),
+            RouteGeometryPoint(segment.toLocation.lat, segment.toLocation.lon),
+        )
     }
 
     private fun routeComparator(optimization: RouteOptimization): Comparator<RoutingPath> {
