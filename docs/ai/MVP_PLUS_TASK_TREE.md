@@ -45,10 +45,10 @@ Primary scenario:
 ### Story 8.2 — Better route selection UX
 
 #### Task 8.2.1 — Stop search/autocomplete
-- [ ] Add API support if current location endpoint is not enough.
-- [ ] Add frontend search inputs for origin/destination.
-- [ ] Support selecting a suggestion.
-- [ ] Preserve stop ID visibility for debugging.
+- [x] Add API support if current location endpoint is not enough.
+- [x] Add frontend search inputs for origin/destination.
+- [x] Support selecting a suggestion.
+- [x] Preserve stop ID visibility for debugging.
 
 #### Task 8.2.2 — Map selection
 - [x] Allow clicking a stop marker to set origin or destination.
