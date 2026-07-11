@@ -145,6 +145,11 @@ The current route/details sidebar is useful for debugging, but it mixes product 
 - [ ] Click demo route.
 - [ ] Assert route line appears.
 
+#### Task 8.5.2.1 — Web UI component tests
+- [ ] Decide when to introduce Vitest + React Testing Library for web UI behavior.
+- [ ] Cover stable route-planning interactions first: demo route fill, autocomplete selection, swap origin/destination, disabled route search states, and route summary reset.
+- [ ] Keep browser smoke checks for layout/map integration; use component tests for deterministic UI state transitions.
+
 #### Task 8.5.3 — Portfolio/demo docs
 - [ ] Add screenshots or GIF.
 - [ ] Document one-command demo path.

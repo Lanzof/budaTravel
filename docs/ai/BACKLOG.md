@@ -138,6 +138,7 @@
 - [x] Manually verify Docker demo locally: demo route renders correctly with shape-based geometry.
 - [ ] Add route API smoke check for the known demo route.
 - [ ] Add browser E2E later: open UI, click demo route, verify route line.
+- [ ] Decide when to add Vitest + React Testing Library for stable web UI interactions: autocomplete, demo route, endpoint swap, route button states.
 - [ ] Add screenshots/GIF and one-command demo documentation.
 
 
