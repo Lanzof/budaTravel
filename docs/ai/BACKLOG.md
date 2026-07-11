@@ -105,6 +105,7 @@
 - [x] Add stop search/autocomplete to choose origin and destination.
 - [x] Support accent-insensitive stop search through derived `name_normalized` storage.
 - [x] Support selecting stops from the map.
+- [x] Support swapping origin and destination.
 - [x] Keep the demo route button as a regression/sanity shortcut.
 - [x] Show route details in a readable way, not only a line on the map.
 
@@ -119,6 +120,7 @@
 - [ ] Determine whether BKK API returns full archives or incremental data.
 - [ ] Check archive size, update frequency, and required auth.
 - [ ] Check whether BKK responses provide `ETag`, `Last-Modified`, checksum, timestamp, or version metadata.
+- [ ] Decide active dataset replacement/history policy for BKK imports so old routes do not bloat the database or affect route search.
 - [ ] Document download-cache and import-if-changed strategy.
 - [ ] Decide how API keys are provided locally and in CI/deploy environments.
 

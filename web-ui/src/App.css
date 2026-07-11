@@ -366,9 +366,22 @@ code {
     transform 0.2s ease;
 }
 
-.secondary-action:hover {
+.secondary-action:hover:not(:disabled) {
   background: #dbeafe;
   transform: translateY(-1px);
+}
+
+.secondary-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.route-actions {
+  display: flex;
+}
+
+.swap-action {
+  width: 100%;
 }
 
 .route-segments {

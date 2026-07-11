@@ -59,7 +59,7 @@ Primary scenario:
 #### Task 8.2.2 — Map selection
 - [x] Allow clicking a stop marker to set origin or destination.
 - [x] Highlight selected origin/destination markers.
-- [ ] Add swap origin/destination action.
+- [x] Add swap origin/destination action.
 
 #### Task 8.2.3 — Route details panel
 - [x] Show route duration and price if present.
@@ -101,6 +101,7 @@ The current route/details sidebar is useful for debugging, but it mixes product 
 - [ ] Check `Last-Modified` support.
 - [ ] Check checksum/version/timestamp metadata.
 - [ ] Decide how to detect unchanged data.
+- [ ] Decide whether BKK imports should replace the active dataset, keep one rollback generation, or retain history; avoid stale routes bloating the database.
 
 #### Task 8.3.3 — Document remote import strategy
 - [ ] Write ADR/tech plan for BKK remote archive import.
