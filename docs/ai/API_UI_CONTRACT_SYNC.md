@@ -1,7 +1,7 @@
 # API/UI Contract Sync — MVP
 
 ## Status
-Draft synced for MVP frontend start
+Implemented for current MVP demo
 
 ## Purpose
 
@@ -101,67 +101,44 @@ Response shape:
     "totalPrice": 0,
     "segments": [
       {
-        "fromStopId": "F00985",
-        "toStopId": "F00981",
-        "fromName": "Deak Ferenc ter M",
-        "toName": "Hild ter",
-        "fromLat": 47.497701,
-        "fromLon": 19.053353,
-        "toLat": 47.498978,
-        "toLon": 19.050884,
-        "departureTime": "2026-01-27T04:44:00+01:00",
-        "arrivalTime": "2026-01-27T04:45:00+01:00",
-        "carrier": "BKK",
-        "type": "BUS"
-      },
-      {
-        "fromStopId": "F00981",
-        "toStopId": "008238",
-        "fromName": "Hild ter",
-        "toName": "Szechenyi Istvan ter",
-        "fromLat": 47.498978,
-        "fromLon": 19.050884,
-        "toLat": 47.500543,
-        "toLon": 19.04669,
-        "departureTime": "2026-01-27T04:45:00+01:00",
-        "arrivalTime": "2026-01-27T04:46:00+01:00",
-        "carrier": "BKK",
-        "type": "BUS"
-      },
-      {
-        "fromStopId": "008238",
-        "toStopId": "F00047",
-        "fromName": "Szechenyi Istvan ter",
-        "toName": "Clark Adam ter",
-        "fromLat": 47.500543,
-        "fromLon": 19.04669,
-        "toLat": 47.498312,
-        "toLon": 19.039816,
-        "departureTime": "2026-01-27T04:46:00+01:00",
-        "arrivalTime": "2026-01-27T04:48:00+01:00",
-        "carrier": "BKK",
-        "type": "BUS"
-      },
-      {
-        "fromStopId": "F00047",
-        "toStopId": "F00045",
-        "fromName": "Clark Adam ter",
-        "toName": "Donati utca",
-        "fromLat": 47.498312,
-        "fromLon": 19.039816,
-        "toLat": 47.501307,
-        "toLon": 19.036072,
-        "departureTime": "2026-01-27T04:48:00+01:00",
-        "arrivalTime": "2026-01-27T04:50:00+01:00",
-        "carrier": "BKK",
-        "type": "BUS"
+        "from": {
+          "stopId": "F00985",
+          "name": "Deak Ferenc ter M",
+          "lat": 47.497701,
+          "lon": 19.053353
+        },
+        "to": {
+          "stopId": "F00045",
+          "name": "Donati utca",
+          "lat": 47.501307,
+          "lon": 19.036072
+        },
+        "timing": {
+          "departureTime": "2026-01-27T04:44:00+01:00",
+          "arrivalTime": "2026-01-27T04:50:00+01:00"
+        },
+        "transport": {
+          "carrier": "BKK",
+          "type": "BUS",
+          "routeId": "0160"
+        },
+        "gtfs": {
+          "tripId": "D075211",
+          "shapeId": "CB58",
+          "fromStopSequence": 1,
+          "toStopSequence": 5
+        },
+        "geometry": [
+          { "lat": 47.497678, "lon": 19.053365 },
+          { "lat": 47.497669, "lon": 19.053327 }
+        ]
       }
     ]
   }
 ]
 ```
 
-The frontend can render MVP Level 1 geometry by connecting each segment's coordinate pair.
+The frontend renders route geometry by preferring each segment's `geometry` points and falling back to the `from`/`to` stop coordinates when geometry is missing.
 
 ## Demo stop pair
 
@@ -216,7 +193,7 @@ May be empty and is currently not used:
 
 ### `routes.txt`
 
-Useful for future UI but not currently ingested into the route response:
+Useful for UI and currently exposed through `transport.routeId` when route metadata is available:
 
 - `route_short_name` is present (`16`);
 - `route_color` is present;

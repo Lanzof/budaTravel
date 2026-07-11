@@ -2,9 +2,7 @@
 
 ## Status
 
-Draft / research-approved direction.
-
-Do not treat this document as implementation-complete. It defines what we want to build next for MVP+.
+Implemented for MVP+ shape-based demo route geometry. Future improvements remain tracked as GTFS normalization/import-source tech debt.
 
 ## Problem
 
@@ -103,14 +101,15 @@ Shape support must not break the existing demo route behavior.
 
 The route API response should include optional geometry.
 
-Preferred simple DTO shape:
+Implemented DTO shape:
 
 ```json
 {
   "segments": [
     {
-      "fromStopId": "F00985",
-      "toStopId": "F00045",
+      "from": { "stopId": "F00985", "name": "Deak Ferenc ter M", "lat": 47.497701, "lon": 19.053353 },
+      "to": { "stopId": "F00045", "name": "Donati utca", "lat": 47.501307, "lon": 19.036072 },
+      "gtfs": { "tripId": "D075211", "shapeId": "CB58", "fromStopSequence": 1, "toStopSequence": 5 },
       "geometry": [
         { "lat": 47.497678, "lon": 19.053365 },
         { "lat": 47.497669, "lon": 19.053327 }
@@ -155,9 +154,7 @@ Do not implement full multimodal routing, walking paths, realtime BKK data, or s
 
 ### NFR-3 — Keep API backward-compatible where practical
 
-Existing fields in `RouteResponse` and `RouteSegment` should remain unless there is a strong reason to break them.
-
-Adding optional geometry is preferred.
+`RouteSegment` was intentionally changed to a nested, self-describing response structure (`from`, `to`, `timing`, `transport`, `gtfs`, `geometry`) before public API stability was required.
 
 ### NFR-4 — Deterministic fallback
 

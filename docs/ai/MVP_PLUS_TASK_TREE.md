@@ -51,36 +51,36 @@ Primary scenario:
 - [ ] Preserve stop ID visibility for debugging.
 
 #### Task 8.2.2 — Map selection
-- [ ] Allow clicking a stop marker to set origin or destination.
-- [ ] Highlight selected origin/destination markers.
+- [x] Allow clicking a stop marker to set origin or destination.
+- [x] Highlight selected origin/destination markers.
 - [ ] Add swap origin/destination action.
 
 #### Task 8.2.3 — Route details panel
 - [x] Show route duration and price if present.
 - [x] Show stop sequence / segment list.
 - [x] Show route/transport metadata when available.
-- [ ] Keep readable no-route and validation errors.
+- [x] Keep readable no-route and validation errors.
 
 ### Story 8.2.5 — Web UI layout polish
 
 The current route/details sidebar is useful for debugging, but it mixes product controls with MVP/debug information. Future UI cleanup should make the route-building flow more stable and readable.
 
 #### Task 8.2.5.1 — Move technical/demo info to the header area
-- [ ] Move MVP description, API endpoint hint, loaded stops count, loading status, and demo route action from the right sidebar to the top/header area near `budaTravel map MVP`.
-- [ ] Keep this block compact so it does not compete with the map.
-- [ ] Preserve demo route as a fast regression/sanity action for local MVP checks.
+- [x] Move MVP description, API endpoint hint, loaded stops count, loading status, and demo route action from the right sidebar to the top/header area near `budaTravel map MVP`.
+- [x] Keep this block compact so it does not compete with the map.
+- [x] Preserve demo route as a fast regression/sanity action for local MVP checks.
 
 #### Task 8.2.5.2 — Reorder the right sidebar around user flow
-- [ ] Show selected stop first.
-- [ ] Keep a stable selected-stop placeholder when nothing is selected so the panel does not jump after marker clicks.
-- [ ] Show origin/destination route controls after the selected stop block.
-- [ ] Show route summary after route controls.
-- [ ] Show route segments after route summary.
+- [x] Show selected stop first.
+- [x] Keep a stable selected-stop placeholder when nothing is selected so the panel does not jump after marker clicks.
+- [x] Show origin/destination route controls after the selected stop block.
+- [x] Show route summary after route controls.
+- [x] Show route segments after route summary.
 
 #### Task 8.2.5.3 — Separate product UI from debug metadata
-- [ ] Keep route/shape/trip IDs available while the project is in MVP/debug mode.
-- [ ] Consider moving verbose technical metadata behind a collapsible debug/details section later.
-- [ ] Avoid letting debug fields dominate the route-building workflow.
+- [x] Keep route/shape/trip IDs available while the project is in MVP/debug mode.
+- [x] Move verbose technical metadata behind a collapsible debug/details section.
+- [x] Avoid letting debug fields dominate the route-building workflow.
 
 ### Story 8.3 — BKK API/data source research
 

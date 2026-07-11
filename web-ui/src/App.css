@@ -5,11 +5,18 @@
 }
 
 .hero-header {
+  display: grid;
+  grid-template-columns: minmax(360px, 1fr) minmax(420px, 0.85fr);
+  align-items: stretch;
+  gap: 28px;
   padding: 32px clamp(16px, 4vw, 56px) 20px;
 }
 
-.hero-header > div {
-  max-width: 920px;
+.hero-copy {
+  display: flex;
+  max-width: 720px;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
 .hero-header h1 {
@@ -20,10 +27,57 @@
 }
 
 .hero-header p {
-  max-width: 720px;
   margin: 0;
   color: #506078;
   font-size: 1.05rem;
+}
+
+.hero-status-panel {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) auto;
+  grid-template-rows: auto auto 1fr;
+  align-self: stretch;
+  gap: 12px;
+  align-content: start;
+  align-items: start;
+  border: 1px solid rgba(23, 32, 51, 0.1);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 18px 56px rgba(30, 58, 138, 0.12);
+  padding: 16px;
+}
+
+.hero-endpoint-note {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+.hero-endpoint-note strong {
+  display: block;
+  margin-top: 6px;
+  color: #172033;
+  font-size: 1rem;
+}
+
+.hero-stats {
+  grid-template-columns: repeat(2, minmax(88px, 1fr));
+}
+
+.hero-stats div {
+  padding: 12px;
+}
+
+.hero-stats dd {
+  font-size: 1.2rem;
+}
+
+.hero-status-panel .demo-action {
+  align-self: stretch;
+  grid-column: auto;
+}
+
+.hero-error {
+  grid-column: 1 / -1;
 }
 
 .eyebrow {
@@ -41,7 +95,7 @@
   gap: 20px;
   padding: 0 clamp(16px, 4vw, 56px) 40px;
   align-items: stretch;
-  height: calc(100vh - 180px);
+  height: calc(100vh - 190px);
   min-height: 620px;
 }
 
@@ -100,7 +154,9 @@ code {
 
 .stats-grid div,
 .notice,
-.selected-card {
+.selected-card,
+.route-summary-card,
+.route-segments-card {
   border: 1px solid rgba(37, 99, 235, 0.16);
   border-radius: 18px;
   background: #f8fbff;
@@ -137,7 +193,27 @@ code {
   color: #475569;
 }
 
+.selected-card-placeholder {
+  min-height: 190px;
+}
+
+.empty-stop-state h3 {
+  margin-top: 8px;
+}
+
 @media (max-width: 960px) {
+  .hero-header {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-status-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-status-panel .demo-action {
+    grid-column: auto;
+  }
+
   .map-shell {
     grid-template-columns: 1fr;
   }
@@ -172,6 +248,10 @@ code {
   .map {
     min-height: 420px;
     height: 420px;
+  }
+
+  .hero-status-panel {
+    padding: 14px;
   }
 
   .sidebar {
@@ -340,8 +420,7 @@ code {
   line-height: 1.35;
 }
 
-.route-segment-main span,
-.route-segment-debug {
+.route-segment-main span {
   color: #64748b;
   font-size: 0.86rem;
 }
@@ -361,7 +440,37 @@ code {
   padding: 4px 8px;
 }
 
+
 .route-segment-debug {
+  color: #64748b;
+  font-size: 0.84rem;
+}
+
+.route-segment-debug summary {
+  cursor: pointer;
+  font-weight: 800;
+  outline-offset: 3px;
+}
+
+.route-segment-debug dl {
+  display: grid;
+  gap: 6px;
+  margin: 8px 0 0;
+}
+
+.route-segment-debug div {
+  display: grid;
+  grid-template-columns: 54px 1fr;
+  gap: 8px;
+}
+
+.route-segment-debug dt {
+  color: #94a3b8;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.route-segment-debug dd {
   margin: 0;
   overflow-wrap: anywhere;
 }
