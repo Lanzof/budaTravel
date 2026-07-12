@@ -135,6 +135,8 @@ Later scheduled import should:
 4. import with status tracking;
 5. preserve existing active dataset if new import fails.
 
+The BKK integration design must also decide the retention policy for old GTFS data. The likely MVP+ direction is to keep one active dataset and replace it on successful changed imports, optionally keeping a single rollback generation later. Keeping historical routes by default would make the database grow and risks stale route data affecting current route search.
+
 ## Relationship to shape geometry
 
 Shape-based route geometry should be implemented against the demo dataset first.

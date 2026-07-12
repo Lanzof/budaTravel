@@ -259,6 +259,7 @@ export function StopsMap() {
   )
 
   const routeLine = useMemo(() => routeToPolyline(route), [route])
+  const canSwapRouteEndpoints = origin !== null || destination !== null
   const canSearchRoute = origin !== null && destination !== null && origin.stopId !== destination.stopId
 
   async function handleRouteSearch(): Promise<void> {
@@ -337,6 +338,18 @@ export function StopsMap() {
     setOriginQuery(DEMO_ORIGIN.name)
     setDestinationQuery(DEMO_DESTINATION.name)
     setSelectedStopId(DEMO_ORIGIN.stopId)
+    setRoute(null)
+    setRouteError(null)
+  }
+
+  function swapRouteEndpoints(): void {
+    const nextOrigin = destination
+    const nextDestination = origin
+
+    setOrigin(nextOrigin)
+    setDestination(nextDestination)
+    setOriginQuery(nextOrigin?.name ?? '')
+    setDestinationQuery(nextDestination?.name ?? '')
     setRoute(null)
     setRouteError(null)
   }
@@ -483,6 +496,16 @@ export function StopsMap() {
               onQueryChange={handleDestinationQueryChange}
               onSelect={selectDestination}
             />
+            <div className="route-actions">
+              <button
+                type="button"
+                className="secondary-action swap-action"
+                disabled={!canSwapRouteEndpoints || isSearchingRoute}
+                onClick={swapRouteEndpoints}
+              >
+                Swap origin/destination
+              </button>
+            </div>
             <p className="route-hint">
               Uses the demo GTFS service date: <code>2026-01-27 04:44 Europe/Budapest</code>.
             </p>

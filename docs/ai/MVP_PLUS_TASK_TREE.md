@@ -59,7 +59,7 @@ Primary scenario:
 #### Task 8.2.2 — Map selection
 - [x] Allow clicking a stop marker to set origin or destination.
 - [x] Highlight selected origin/destination markers.
-- [ ] Add swap origin/destination action.
+- [x] Add swap origin/destination action.
 
 #### Task 8.2.3 — Route details panel
 - [x] Show route duration and price if present.
@@ -101,6 +101,7 @@ The current route/details sidebar is useful for debugging, but it mixes product 
 - [ ] Check `Last-Modified` support.
 - [ ] Check checksum/version/timestamp metadata.
 - [ ] Decide how to detect unchanged data.
+- [ ] Decide whether BKK imports should replace the active dataset, keep one rollback generation, or retain history; avoid stale routes bloating the database.
 
 #### Task 8.3.3 — Document remote import strategy
 - [ ] Write ADR/tech plan for BKK remote archive import.
@@ -143,6 +144,11 @@ The current route/details sidebar is useful for debugging, but it mixes product 
 - [ ] Open web UI.
 - [ ] Click demo route.
 - [ ] Assert route line appears.
+
+#### Task 8.5.2.1 — Web UI component tests
+- [ ] Decide when to introduce Vitest + React Testing Library for web UI behavior.
+- [ ] Cover stable route-planning interactions first: demo route fill, autocomplete selection, swap origin/destination, disabled route search states, and route summary reset.
+- [ ] Keep browser smoke checks for layout/map integration; use component tests for deterministic UI state transitions.
 
 #### Task 8.5.3 — Portfolio/demo docs
 - [ ] Add screenshots or GIF.
