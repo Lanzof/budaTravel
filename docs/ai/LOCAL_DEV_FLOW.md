@@ -151,3 +151,21 @@ docker compose down -v
 - Full GTFS archives are intentionally not tracked in git.
 - BKK remote/scheduled import is not implemented yet.
 - Browser E2E is still manual; no Playwright smoke test is committed yet.
+
+
+## GTFS archive source override
+
+By default the ingestor uses the bundled demo archive:
+
+```text
+budatravel.gtfs.source=demo
+budatravel.gtfs.demo.resource=classpath:gtfs/budapest-mini.zip
+```
+
+For manual full-archive experiments, point the ingestor at a mounted/local file:
+
+```bash
+GTFS_SOURCE=local-file GTFS_ARCHIVE_PATH=/path/to/budapest_gtfs.zip docker compose up --build ingestor
+```
+
+The import flow uses `GtfsArchiveProvider` and reads ZIP entries through streams, so classpath archives and local files share the same parser path. The previous temporary-file adapter for nested Spring Boot jar resources is no longer needed.

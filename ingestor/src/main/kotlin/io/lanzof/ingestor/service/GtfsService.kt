@@ -1,7 +1,6 @@
 package io.lanzof.ingestor.service
 
 import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.MappingIterator
 import com.fasterxml.jackson.dataformat.csv.CsvMapper
 import com.fasterxml.jackson.dataformat.csv.CsvSchema
 import io.lanzof.core.entity.Connection
@@ -14,18 +13,16 @@ import io.lanzof.ingestor.gtfs.GtfsShapePoint
 import io.lanzof.ingestor.gtfs.GtfsStop
 import io.lanzof.ingestor.gtfs.GtfsStopTime
 import io.lanzof.ingestor.gtfs.GtfsTrip
+import io.lanzof.ingestor.gtfs.archive.GtfsArchive
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.io.File
 import java.io.InputStream
 import java.math.BigDecimal
-import java.nio.file.Paths
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.zip.ZipFile
 
 @Service
 class GtfsService(
@@ -40,189 +37,159 @@ class GtfsService(
     }
     private val gtfsDateFormatter = DateTimeFormatter.BASIC_ISO_DATE
 
-    fun importStopsFromZip(zipFilePath: String) {
-        logger.info("Starting import from: $zipFilePath")
+    fun importStopsFromArchive(archive: GtfsArchive) {
+        logger.info("Starting stops import from: {}", archive.description)
 
-        val path = Paths.get(zipFilePath)
-        if (!path.toFile().exists()) {
-            logger.error("File not found: $zipFilePath")
-            return
-        }
-
-        val zipFile = ZipFile(path.toFile())
-        val stopsEntry = zipFile.getEntry("stops.txt")
-
-        if (stopsEntry == null) {
-            logger.error("stops.txt not found in archive")
-            zipFile.close()
-            return
-        }
-
-        val inputStream: InputStream = zipFile.getInputStream(stopsEntry)
-        val schema: CsvSchema = CsvSchema.emptySchema().withHeader()
-
+        val schema = CsvSchema.emptySchema().withHeader()
         val locationsToSave = mutableListOf<Location>()
-
-        val iterator: MappingIterator<GtfsStop> =
-            csvMapper.readerFor(GtfsStop::class.java).with(schema).readValues(inputStream)
-
         var count = 0
-        iterator.forEach { gtfsStop ->
-            val location = Location(
-                stopId = gtfsStop.stop_id,
-                name = gtfsStop.stop_name,
-                lat = gtfsStop.stop_lat,
-                lon = gtfsStop.stop_lon,
-            )
-            locationsToSave.add(location)
-            count++
 
-            if (count % BATCH_SIZE == 0) {
-                locationRepo.saveAll(locationsToSave)
-                locationsToSave.clear()
-                logger.info("Processed $count stops...")
-            }
+        archive.openRequiredEntry("stops.txt").use { inputStream ->
+            csvMapper
+                .readerFor(GtfsStop::class.java)
+                .with(schema)
+                .readValues<GtfsStop>(inputStream)
+                .use { iterator ->
+                    iterator.forEach { gtfsStop ->
+                        locationsToSave.add(
+                            Location(
+                                stopId = gtfsStop.stop_id,
+                                name = gtfsStop.stop_name,
+                                lat = gtfsStop.stop_lat,
+                                lon = gtfsStop.stop_lon,
+                            )
+                        )
+                        count++
+
+                        if (count % BATCH_SIZE == 0) {
+                            locationRepo.saveAll(locationsToSave)
+                            locationsToSave.clear()
+                            logger.info("Processed {} stops...", count)
+                        }
+                    }
+                }
         }
 
         if (locationsToSave.isNotEmpty()) {
             locationRepo.saveAll(locationsToSave)
         }
 
-        zipFile.close()
-        logger.info("Import finished! Total stops: $count")
+        logger.info("Import stops finished! Total stops: {}", count)
     }
 
-    fun importShapesFromZip(zipFilePath: String) {
-        logger.info("Starting Shapes import from: $zipFilePath")
+    fun importShapesFromArchive(archive: GtfsArchive) {
+        logger.info("Starting shapes import from: {}", archive.description)
 
-        val file = File(zipFilePath)
-        if (!file.exists()) {
-            logger.error("File not found: $zipFilePath")
-            return
-        }
+        val inputStream = archive.openEntry("shapes.txt")
+            ?: run {
+                logger.warn("shapes.txt not found; route geometry will fall back to stop-to-stop lines")
+                return
+            }
 
-        ZipFile(file).use { zipFile ->
-            val shapesEntry = zipFile.getEntry("shapes.txt")
-                ?: run {
-                    logger.warn("shapes.txt not found; route geometry will fall back to stop-to-stop lines")
-                    return
-                }
+        val schema = CsvSchema.emptySchema().withHeader()
+        val shapePointsToSave = mutableListOf<ShapePointEntity>()
+        var count = 0
 
-            val schema = CsvSchema.emptySchema().withHeader()
-            val shapePointsToSave = mutableListOf<ShapePointEntity>()
-            var count = 0
-
+        inputStream.use {
             csvMapper
                 .readerFor(GtfsShapePoint::class.java)
                 .with(schema)
-                .readValues<GtfsShapePoint>(zipFile.getInputStream(shapesEntry))
-                .asSequence()
-                .forEach { point ->
-                    shapePointsToSave.add(
-                        ShapePointEntity(
-                            shapeId = point.shape_id,
-                            shapePtSequence = point.shape_pt_sequence,
-                            lat = point.shape_pt_lat,
-                            lon = point.shape_pt_lon,
-                            shapeDistTraveled = point.shape_dist_traveled,
+                .readValues<GtfsShapePoint>(it)
+                .use { iterator ->
+                    iterator.forEach { point ->
+                        shapePointsToSave.add(
+                            ShapePointEntity(
+                                shapeId = point.shape_id,
+                                shapePtSequence = point.shape_pt_sequence,
+                                lat = point.shape_pt_lat,
+                                lon = point.shape_pt_lon,
+                                shapeDistTraveled = point.shape_dist_traveled,
+                            )
                         )
-                    )
-                    count++
+                        count++
 
-                    if (count % BATCH_SIZE == 0) {
-                        shapePointRepo.saveAll(shapePointsToSave)
-                        shapePointsToSave.clear()
-                        logger.info("Processed $count shape points...")
+                        if (count % BATCH_SIZE == 0) {
+                            shapePointRepo.saveAll(shapePointsToSave)
+                            shapePointsToSave.clear()
+                            logger.info("Processed {} shape points...", count)
+                        }
                     }
                 }
-
-            if (shapePointsToSave.isNotEmpty()) {
-                shapePointRepo.saveAll(shapePointsToSave)
-            }
-
-            logger.info("Import Shapes finished! Total shape points: $count")
         }
+
+        if (shapePointsToSave.isNotEmpty()) {
+            shapePointRepo.saveAll(shapePointsToSave)
+        }
+
+        logger.info("Import shapes finished! Total shape points: {}", count)
     }
 
-    fun importStopTimesFromZip(zipFilePath: String, carrierName: String) {
-        logger.info("Starting StopTimes import for $carrierName from: $zipFilePath")
+    fun importStopTimesFromArchive(archive: GtfsArchive, carrierName: String) {
+        logger.info("Starting stop times import for {} from: {}", carrierName, archive.description)
 
-        val file = File(zipFilePath)
-        if (!file.exists()) {
-            logger.error("File not found: $zipFilePath")
-            return
-        }
+        val serviceDate = resolveServiceDate(archive)
+        val tripMetadataById = readTripMetadata(archive)
+        logger.info("Resolved GTFS service date: {}", serviceDate)
+        logger.info("Loaded {} GTFS trips with metadata", tripMetadataById.size)
 
-        ZipFile(file).use { zipFile ->
-            val stopTimesEntry = zipFile.getEntry("stop_times.txt")
-                ?: run {
-                    logger.error("stop_times.txt not found")
-                    return
-                }
-            val serviceDate = resolveServiceDate(zipFile)
-            val tripMetadataById = readTripMetadata(zipFile)
-            logger.info("Resolved GTFS service date: $serviceDate")
-            logger.info("Loaded ${tripMetadataById.size} GTFS trips with metadata")
+        val locationMap = locationRepo.findAll()
+            .associateBy { it.stopId }
+        val schema = CsvSchema.emptySchema().withHeader()
+        val connectionsToSave = mutableListOf<Connection>()
+        var currentTripId: String? = null
+        val tripBuffer = mutableListOf<GtfsStopTime>()
+        var tripsProcessed = 0
 
-            val locationMap = locationRepo.findAll()
-                .associateBy { it.stopId }
-
-            val inputStream = zipFile.getInputStream(stopTimesEntry)
-            val schema = CsvSchema.emptySchema().withHeader()
-
-            val connectionsToSave = mutableListOf<Connection>()
-            var currentTripId: String? = null
-            val tripBuffer = mutableListOf<GtfsStopTime>()
-            var tripsProcessed = 0
-
+        archive.openRequiredEntry("stop_times.txt").use { inputStream ->
             csvMapper
                 .readerFor(GtfsStopTime::class.java)
                 .with(schema)
                 .readValues<GtfsStopTime>(inputStream)
-                .asSequence()
-                .forEach { stopTime ->
-                    if (stopTime.trip_id != currentTripId) {
-                        if (tripBuffer.isNotEmpty()) {
-                            processTrip(
-                                stops = tripBuffer,
-                                carrier = carrierName,
-                                serviceDate = serviceDate,
-                                locationMap = locationMap,
-                                tripMetadata = tripMetadataById[currentTripId],
-                                buffer = connectionsToSave,
-                            )
-                            tripBuffer.clear()
+                .use { iterator ->
+                    iterator.forEach { stopTime ->
+                        if (stopTime.trip_id != currentTripId) {
+                            if (tripBuffer.isNotEmpty()) {
+                                processTrip(
+                                    stops = tripBuffer,
+                                    carrier = carrierName,
+                                    serviceDate = serviceDate,
+                                    locationMap = locationMap,
+                                    tripMetadata = tripMetadataById[currentTripId],
+                                    buffer = connectionsToSave,
+                                )
+                                tripBuffer.clear()
 
-                            tripsProcessed++
-                            if (tripsProcessed % 100 == 0) {
-                                logger.info("Processed $tripsProcessed trips...")
-                                connectionRepo.saveAll(connectionsToSave)
-                                connectionsToSave.clear()
+                                tripsProcessed++
+                                if (tripsProcessed % 100 == 0) {
+                                    logger.info("Processed {} trips...", tripsProcessed)
+                                    connectionRepo.saveAll(connectionsToSave)
+                                    connectionsToSave.clear()
+                                }
                             }
+                            currentTripId = stopTime.trip_id
                         }
-                        currentTripId = stopTime.trip_id
+
+                        tripBuffer.add(stopTime)
                     }
-
-                    tripBuffer.add(stopTime)
                 }
-
-            if (tripBuffer.isNotEmpty()) {
-                processTrip(
-                    stops = tripBuffer,
-                    carrier = carrierName,
-                    serviceDate = serviceDate,
-                    locationMap = locationMap,
-                    tripMetadata = tripMetadataById[currentTripId],
-                    buffer = connectionsToSave,
-                )
-            }
-
-            if (connectionsToSave.isNotEmpty()) {
-                connectionRepo.saveAll(connectionsToSave)
-            }
         }
 
-        logger.info("Import StopTimes finished!")
+        if (tripBuffer.isNotEmpty()) {
+            processTrip(
+                stops = tripBuffer,
+                carrier = carrierName,
+                serviceDate = serviceDate,
+                locationMap = locationMap,
+                tripMetadata = tripMetadataById[currentTripId],
+                buffer = connectionsToSave,
+            )
+        }
+
+        if (connectionsToSave.isNotEmpty()) {
+            connectionRepo.saveAll(connectionsToSave)
+        }
+
+        logger.info("Import stop times finished!")
     }
 
     private fun processTrip(
@@ -243,57 +210,61 @@ class GtfsService(
             val toLoc = locationMap[to.stop_id]
 
             if (fromLoc != null && toLoc != null && fromLoc.id != toLoc.id) {
-                val conn = Connection(
-                    fromLocation = fromLoc,
-                    toLocation = toLoc,
-                    departureTime = parseGtfsTime(from.departure_time, serviceDate),
-                    arrivalTime = parseGtfsTime(to.arrival_time, serviceDate),
-                    price = BigDecimal.ZERO,
-                    carrier = carrier,
-                    type = "PUBLIC_TRANSPORT",
-                    tripId = from.trip_id,
-                    routeId = tripMetadata?.routeId,
-                    shapeId = tripMetadata?.shapeId,
-                    fromStopSequence = from.stop_sequence,
-                    toStopSequence = to.stop_sequence,
-                    fromShapeDistTraveled = from.shape_dist_traveled,
-                    toShapeDistTraveled = to.shape_dist_traveled,
+                buffer.add(
+                    Connection(
+                        fromLocation = fromLoc,
+                        toLocation = toLoc,
+                        departureTime = parseGtfsTime(from.departure_time, serviceDate),
+                        arrivalTime = parseGtfsTime(to.arrival_time, serviceDate),
+                        price = BigDecimal.ZERO,
+                        carrier = carrier,
+                        type = "PUBLIC_TRANSPORT",
+                        tripId = from.trip_id,
+                        routeId = tripMetadata?.routeId,
+                        shapeId = tripMetadata?.shapeId,
+                        fromStopSequence = from.stop_sequence,
+                        toStopSequence = to.stop_sequence,
+                        fromShapeDistTraveled = from.shape_dist_traveled,
+                        toShapeDistTraveled = to.shape_dist_traveled,
+                    )
                 )
-                buffer.add(conn)
             }
         }
     }
 
-    private fun readTripMetadata(zipFile: ZipFile): Map<String, TripMetadata> {
-        val tripsEntry = zipFile.getEntry("trips.txt")
+    private fun readTripMetadata(archive: GtfsArchive): Map<String, TripMetadata> {
+        val inputStream = archive.openEntry("trips.txt")
             ?: run {
                 logger.warn("trips.txt not found; route geometry will not have trip/shape metadata")
                 return emptyMap()
             }
 
         val schema = CsvSchema.emptySchema().withHeader()
-        return csvMapper
-            .readerFor(GtfsTrip::class.java)
-            .with(schema)
-            .readValues<GtfsTrip>(zipFile.getInputStream(tripsEntry))
-            .asSequence()
-            .associate { trip ->
-                trip.trip_id to TripMetadata(
-                    tripId = trip.trip_id,
-                    routeId = trip.route_id,
-                    shapeId = trip.shape_id,
-                )
-            }
+        return inputStream.use {
+            csvMapper
+                .readerFor(GtfsTrip::class.java)
+                .with(schema)
+                .readValues<GtfsTrip>(it)
+                .use { iterator ->
+                    iterator.asSequence()
+                        .associate { trip ->
+                            trip.trip_id to TripMetadata(
+                                tripId = trip.trip_id,
+                                routeId = trip.route_id,
+                                shapeId = trip.shape_id,
+                            )
+                        }
+                }
+        }
     }
 
     // MVP/demo simplification: budapest-mini.zip contains one service_id and one active
     // calendar_dates.txt date, so a single feed-level service date is enough for now.
     // Full GTFS support should resolve the date per trip service_id and handle
     // calendar.txt plus calendar_dates exception_type=1/2 semantics.
-    private fun resolveServiceDate(zipFile: ZipFile): LocalDate {
-        val calendarDatesEntry = zipFile.getEntry("calendar_dates.txt")
-        if (calendarDatesEntry != null) {
-            zipFile.getInputStream(calendarDatesEntry).bufferedReader().useLines { lines ->
+    private fun resolveServiceDate(archive: GtfsArchive): LocalDate {
+        archive.openEntry("calendar_dates.txt")?.use { inputStream ->
+            inputStream.bufferedReader().useLines { lines ->
                 lines.drop(1).forEach { line ->
                     val fields = line.split(',')
                     if (fields.size >= 2 && fields[1].isNotBlank()) {
@@ -303,9 +274,8 @@ class GtfsService(
             }
         }
 
-        val feedInfoEntry = zipFile.getEntry("feed_info.txt")
-        if (feedInfoEntry != null) {
-            zipFile.getInputStream(feedInfoEntry).bufferedReader().useLines { lines ->
+        archive.openEntry("feed_info.txt")?.use { inputStream ->
+            inputStream.bufferedReader().useLines { lines ->
                 val iterator = lines.iterator()
                 if (iterator.hasNext()) {
                     val header = iterator.next().split(',')
@@ -324,6 +294,9 @@ class GtfsService(
         logger.warn("GTFS service date not found in calendar_dates.txt or feed_info.txt; falling back to current date")
         return LocalDate.now(ZoneId.of("Europe/Budapest"))
     }
+
+    private fun GtfsArchive.openRequiredEntry(name: String): InputStream = openEntry(name)
+        ?: throw IllegalArgumentException("$name not found in GTFS archive: $description")
 
     private fun parseGtfsTime(timeStr: String, serviceDate: LocalDate): OffsetDateTime {
         val parts = timeStr.split(":")
