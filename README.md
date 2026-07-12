@@ -71,16 +71,24 @@ Open the UI:
 http://localhost:5173
 ```
 
-Run a route API smoke check against the known demo route:
+Run smoke checks against the already started local demo stack:
 
 ```bash
+./scripts/smoke-demo-stack.sh
+```
+
+Or run checks separately:
+
+```bash
+./scripts/smoke-web-ui.sh
 ./scripts/smoke-demo-route.sh
 ```
 
-Override the API URL when needed:
+Override URLs when needed:
 
 ```bash
 API_BASE_URL=http://localhost:8080 ./scripts/smoke-demo-route.sh
+WEB_UI_URL=http://localhost:5173 ./scripts/smoke-web-ui.sh
 ```
 
 Useful cleanup command:

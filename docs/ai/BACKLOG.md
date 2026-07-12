@@ -134,9 +134,10 @@
 - [ ] Implement scheduled import only after the BKK data source research is complete.
 
 ### Story 8.5 — E2E and demo quality
-- [ ] Add Docker Compose smoke test for demo stack startup.
+- [x] Add smoke script for an already started Docker Compose demo stack.
 - [x] Manually verify Docker demo locally: demo route renders correctly with shape-based geometry.
 - [x] Add route API smoke check for the known demo route.
+- [x] Add web UI reachability smoke check.
 - [ ] Add browser E2E later: open UI, click demo route, verify route line.
 - [ ] Decide when to add Vitest + React Testing Library for stable web UI interactions: autocomplete, demo route, endpoint swap, route button states.
 - [ ] Add screenshots/GIF and one-command demo documentation.
