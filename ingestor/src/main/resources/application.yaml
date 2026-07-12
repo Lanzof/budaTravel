@@ -21,3 +21,7 @@ budatravel:
       resource: ${GTFS_DEMO_RESOURCE:classpath:gtfs/budapest-mini.zip}
     local-file:
       path: ${GTFS_ARCHIVE_PATH:}
+    bkk-remote:
+      url: ${BKK_GTFS_URL:}
+      api-key: ${BKK_API_KEY:}
+      cache-dir: ${BKK_GTFS_CACHE_DIR:/tmp/budatravel/gtfs-cache}

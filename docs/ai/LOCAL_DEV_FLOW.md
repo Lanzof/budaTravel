@@ -168,4 +168,14 @@ For manual full-archive experiments, point the ingestor at a mounted/local file:
 GTFS_SOURCE=local-file GTFS_ARCHIVE_PATH=/path/to/budapest_gtfs.zip docker compose up --build ingestor
 ```
 
+
+Reserved future BKK remote import configuration is already named, but the provider is intentionally not implemented until BKK API/cache research is complete:
+
+```text
+budatravel.gtfs.source=bkk-remote
+budatravel.gtfs.bkk-remote.url=${BKK_GTFS_URL:}
+budatravel.gtfs.bkk-remote.api-key=${BKK_API_KEY:}
+budatravel.gtfs.bkk-remote.cache-dir=${BKK_GTFS_CACHE_DIR:/tmp/budatravel/gtfs-cache}
+```
+
 The import flow uses `GtfsArchiveProvider` and reads ZIP entries through streams, so classpath archives and local files share the same parser path. The previous temporary-file adapter for nested Spring Boot jar resources is no longer needed.

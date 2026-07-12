@@ -125,12 +125,12 @@
 - [ ] Decide how API keys are provided locally and in CI/deploy environments.
 
 ### Story 8.4 — Ingestor profiles and source abstraction
-- [ ] Add `budatravel.gtfs.source` configuration: demo / local-file / bkk-remote.
-- [x] Add Spring config defaults for demo and local-file GTFS import.
+- [x] Add `budatravel.gtfs.source` configuration: demo / local-file / bkk-remote.
+- [x] Add Spring config defaults for demo, local-file, and reserved bkk-remote GTFS import.
 - [x] Introduce `GtfsArchiveProvider` or equivalent.
 - [x] Implement bundled demo archive provider.
 - [x] Implement local file archive provider.
-- [ ] Design BKK remote provider with cache/import-if-changed behavior.
+- [ ] Design and implement BKK remote provider with cache/import-if-changed behavior.
 - [ ] Implement scheduled import only after the BKK data source research is complete.
 
 ### Story 8.5 — E2E and demo quality
