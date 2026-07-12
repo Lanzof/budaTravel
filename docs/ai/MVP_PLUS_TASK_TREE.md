@@ -135,9 +135,9 @@ The current route/details sidebar is useful for debugging, but it mixes product 
 #### Task 8.5.1 — Docker smoke test
 - [ ] Add a scripted smoke test for Docker Compose demo startup.
 - [x] Manually verify Docker Compose demo startup and demo route rendering after shape geometry implementation.
-- [ ] Check API readiness.
+- [x] Check API readiness.
 - [ ] Check web UI is reachable.
-- [ ] Optionally call demo route API.
+- [x] Call demo route API for the known demo route.
 
 #### Task 8.5.2 — Browser E2E
 - [ ] Add Playwright or equivalent later.
