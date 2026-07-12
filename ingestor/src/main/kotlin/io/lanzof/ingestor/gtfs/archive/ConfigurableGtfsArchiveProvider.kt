@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component
 @Component
 class ConfigurableGtfsArchiveProvider(
     private val resourceLoader: ResourceLoader,
+    private val bkkStaticProvider: BkkStaticGtfsArchiveProvider,
     @param:Value("\${budatravel.gtfs.source}") private val source: String,
     @param:Value("\${budatravel.gtfs.demo.resource}") private val demoResource: String,
     @param:Value("\${budatravel.gtfs.local-file.path}") private val localFilePath: String,
@@ -20,11 +21,9 @@ class ConfigurableGtfsArchiveProvider(
                 }
                 "file:$localFilePath"
             }
-            "bkk-remote" -> throw UnsupportedOperationException(
-                "budatravel.gtfs.source=bkk-remote is reserved, but the remote BKK archive provider is not implemented yet."
-            )
+            "bkk-static" -> return bkkStaticProvider.getArchive()
             else -> throw IllegalArgumentException(
-                "Unsupported budatravel.gtfs.source='$source'. Supported values: demo, local-file, bkk-remote."
+                "Unsupported budatravel.gtfs.source='$source'. Supported values: demo, local-file, bkk-static."
             )
         }
 
@@ -33,7 +32,16 @@ class ConfigurableGtfsArchiveProvider(
 
         return ResourceGtfsArchive(
             resource = resource,
+            source = source,
+            datasetName = source.datasetName(),
             description = "$source:$resourceLocation",
         )
     }
+}
+
+
+private fun String.datasetName(): String = when (this) {
+    "demo" -> "budapest-mini"
+    "local-file" -> "local-gtfs"
+    else -> this
 }

@@ -13,7 +13,7 @@ Primary scenario:
 ### Story 8.1 — Shape-based route geometry
 
 #### Task 8.1.1 — Verify source data
-- [x] Confirm full BKK GTFS archive has populated `shapes.txt`.
+- [x] Confirm full BKK static GTFS archive has populated `shapes.txt`.
 - [x] Confirm `budapest-mini.zip` has populated `shapes.txt`.
 - [x] Confirm `trips.txt.shape_id` exists.
 - [x] Confirm `stop_times.txt.shape_dist_traveled` exists.
@@ -91,23 +91,23 @@ The current route/details sidebar is useful for debugging, but it mixes product 
 ### Story 8.3 — BKK API/data source research
 
 #### Task 8.3.1 — BKK endpoint research
-- [ ] Identify exact BKK GTFS endpoint/API flow.
-- [ ] Determine whether response is full archive or incremental data.
-- [ ] Measure archive size.
-- [ ] Check auth requirements and whether API key is mandatory.
+- [x] Identify exact BKK static GTFS endpoint/API flow.
+- [x] Determine whether response is full archive or incremental data.
+- [x] Measure archive size.
+- [x] Check auth requirements and whether API key is mandatory for the static archive.
 
 #### Task 8.3.2 — Cache/version research
-- [ ] Check `ETag` support.
-- [ ] Check `Last-Modified` support.
-- [ ] Check checksum/version/timestamp metadata.
-- [ ] Decide how to detect unchanged data.
+- [x] Check `ETag` support.
+- [x] Check `Last-Modified` support.
+- [x] Check checksum/version/timestamp metadata available from HTTP headers.
+- [x] Decide how to detect unchanged data with conditional HTTP requests.
 - [ ] Decide whether BKK imports should replace the active dataset, keep one rollback generation, or retain history; avoid stale routes bloating the database.
 
-#### Task 8.3.3 — Document remote import strategy
-- [ ] Write ADR/tech plan for BKK remote archive import.
-- [ ] Define env vars: `BKK_API_KEY`, `BKK_GTFS_URL`, cache dir.
-- [ ] Define behavior for missing/invalid key.
-- [ ] Define import-if-changed flow.
+#### Task 8.3.3 — Document static archive import strategy
+- [x] Write ADR/tech plan for BKK static archive import.
+- [x] Define env vars: `BKK_GTFS_URL` and cache dir.
+- [x] Define key behavior: API key is not required for current static public archive.
+- [x] Define import-if-changed download/cache flow.
 
 ### Story 8.4 — Ingestor profiles and source abstraction
 
@@ -115,13 +115,13 @@ The current route/details sidebar is useful for debugging, but it mixes product 
 - [x] Add `budatravel.gtfs.source` property.
 - [x] Add demo source using bundled mini archive.
 - [x] Add local-file source config using `GTFS_ARCHIVE_PATH`.
-- [x] Reserve BKK remote config using `BKK_GTFS_URL`, `BKK_API_KEY`, and `BKK_GTFS_CACHE_DIR`.
+- [x] Reserve BKK static config using `BKK_GTFS_URL` and `BKK_GTFS_CACHE_DIR`.
 
 #### Task 8.4.2 — Archive provider abstraction
 - [x] Introduce `GtfsArchiveProvider` or equivalent.
 - [x] Implement classpath/demo provider.
 - [x] Implement local file provider.
-- [ ] Keep BKK remote provider as separate later task.
+- [x] Implement BKK static provider as a cached archive source.
 - [x] Remove temporary-file workaround once importer accepts `Resource`/stream/archive abstraction.
 
 #### Task 8.4.3 — Scheduled import design
@@ -172,7 +172,7 @@ The current route/details sidebar is useful for debugging, but it mixes product 
 These items are intentionally postponed until after the current shape-geometry MVP+ work.
 
 #### Task 8.6.1 — BKK realtime research
-- [ ] Research BKK GTFS-Realtime endpoints and response formats.
+- [ ] Research BKK static GTFS-Realtime endpoints and response formats.
 - [ ] Determine whether BKK exposes protobuf-over-HTTP feeds or actual gRPC services.
 - [ ] Evaluate live vehicle positions as a WebClient/WebFlux + SSE experiment.
 - [ ] Decide whether realtime positions should be rendered on the map.

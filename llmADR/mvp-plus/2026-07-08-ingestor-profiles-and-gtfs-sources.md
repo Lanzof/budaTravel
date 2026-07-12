@@ -26,7 +26,7 @@ The intended modes are:
    - Uses a mounted or configured local GTFS archive path.
    - Useful for manually testing full archives without calling BKK API.
 
-3. **BKK remote profile / source**
+3. **BKK static profile / source**
    - Downloads GTFS data from BKK API or BKK-provided URL.
    - Uses API key/environment configuration when required.
    - Should support caching and import-if-changed.
@@ -44,22 +44,21 @@ Example shape:
 ```yaml
 budatravel:
   gtfs:
-    source: demo # demo | local-file | bkk-remote
+    source: demo # demo | local-file | bkk-static
     demo:
       resource: classpath:gtfs/budapest-mini.zip
     local-file:
       path: ${GTFS_ARCHIVE_PATH:}
-    bkk:
-      url: ${BKK_GTFS_URL:}
-      api-key: ${BKK_API_KEY:}
-      cache-dir: ${BKK_GTFS_CACHE_DIR:/tmp/budatravel/gtfs-cache}
+    bkk-static:
+      url: ${BKK_GTFS_URL:https://go.bkk.hu/api/static/v1/public-gtfs/budapest_gtfs.zip}
+      cache-dir: ${BKK_GTFS_CACHE_DIR:/data/gtfs-cache}
 ```
 
 Profiles can then set defaults:
 
 - `demo` profile -> `budatravel.gtfs.source=demo`
 - `local-file` profile -> `budatravel.gtfs.source=local-file`
-- `bkk` profile -> `budatravel.gtfs.source=bkk-remote`
+- `bkk` profile -> `budatravel.gtfs.source=bkk-static`
 
 The exact names can be adjusted during implementation.
 
@@ -100,7 +99,7 @@ GTFS source: demo, archive: classpath:gtfs/budapest-mini.zip
 or
 
 ```text
-GTFS source: bkk-remote, url: https://..., cache: hit, changed: false
+GTFS source: bkk-static, url: https://..., cache: hit, changed: false
 ```
 
 ## Secret handling
@@ -111,14 +110,14 @@ Use:
 
 - local `.env` / environment variables;
 - Docker Compose environment variables;
-- GitHub Actions secrets if CI/deploy ever needs remote import;
+- GitHub Actions secrets if CI/deploy ever needs static archive import;
 - `.env.example` with placeholder values only.
 
 ## Scheduled import behavior
 
 Scheduled import must not be the first implementation step.
 
-Before scheduling, we need BKK API research:
+Before scheduling, we need BKK static/live API research:
 
 - archive size;
 - response format;
@@ -146,7 +145,7 @@ Reason:
 - `budapest-mini.zip` already contains real `shapes.txt` data;
 - local feedback stays fast;
 - the implementation will naturally apply to full GTFS archives later;
-- BKK remote import can be added after the data-source strategy is proven.
+- BKK static import can be added after the data-source strategy is proven.
 
 ## Non-goals
 
@@ -164,6 +163,6 @@ The ingestor source strategy is ready when:
 
 - the project has a documented source selection model;
 - demo import uses a configurable classpath source, not hard-coded temp-file logic;
-- future local-file and BKK-remote sources have clear task definitions;
-- BKK API key handling is documented as environment/secret-based;
-- scheduled import is treated as a later feature gated by BKK API research.
+- local-file and BKK static sources have clear task definitions;
+- BKK static archive does not require an API key; future live API key handling is documented separately;
+- scheduled import is treated as a later feature gated by BKK static/live API research.

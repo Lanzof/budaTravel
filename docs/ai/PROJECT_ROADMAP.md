@@ -292,7 +292,7 @@ Priorities:
 4. **Ingestor profiles and source abstraction**
    - Demo profile uses bundled mini GTFS data.
    - Local-file source can ingest a manually provided archive.
-   - BKK remote source is added after API research.
+   - BKK static source is added after API research.
    - Scheduled import is implemented later on top of the remote source.
    - Avoid making every local development run download and ingest large archives.
 

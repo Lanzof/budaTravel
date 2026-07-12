@@ -149,7 +149,7 @@ docker compose down -v
 ## Known gaps
 
 - Full GTFS archives are intentionally not tracked in git.
-- BKK remote/scheduled import is not implemented yet.
+- Automatic BKK static archive DB rebuild/scheduled import is not implemented yet.
 - Browser E2E is still manual; no Playwright smoke test is committed yet.
 
 
@@ -169,13 +169,20 @@ GTFS_SOURCE=local-file GTFS_ARCHIVE_PATH=/path/to/budapest_gtfs.zip docker compo
 ```
 
 
-Reserved future BKK remote import configuration is already named, but the provider is intentionally not implemented until BKK API/cache research is complete:
+BKK static import can download the public static archive into a local cache. The default URL points at BKK OpenData and does not require an API key:
 
 ```text
-budatravel.gtfs.source=bkk-remote
-budatravel.gtfs.bkk-remote.url=${BKK_GTFS_URL:}
-budatravel.gtfs.bkk-remote.api-key=${BKK_API_KEY:}
-budatravel.gtfs.bkk-remote.cache-dir=${BKK_GTFS_CACHE_DIR:/tmp/budatravel/gtfs-cache}
+budatravel.gtfs.source=bkk-static
+budatravel.gtfs.bkk-static.url=${BKK_GTFS_URL:https://go.bkk.hu/api/static/v1/public-gtfs/budapest_gtfs.zip}
+budatravel.gtfs.bkk-static.cache-dir=${BKK_GTFS_CACHE_DIR:/data/gtfs-cache}
 ```
+
+Example one-shot static archive import against the Docker Compose stack:
+
+```bash
+GTFS_SOURCE=bkk-static docker compose up --build ingestor
+```
+
+The downloaded full archive is about 48 MB. Docker Compose bind-mounts `./.local/gtfs-cache` into `/data/gtfs-cache`, so repeated static archive runs can reuse `ETag` / `Last-Modified` metadata and skip unchanged downloads. If a newer archive appears while the matching dataset is already imported, the current ingestor only logs that automatic DB rebuild is not implemented yet. Reset the DB volume before switching GTFS sources until import generations are designed.
 
 The import flow uses `GtfsArchiveProvider` and reads ZIP entries through streams, so classpath archives and local files share the same parser path. The previous temporary-file adapter for nested Spring Boot jar resources is no longer needed.
