@@ -7,7 +7,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 @Configuration
 class CorsConfig(
-    @Value("\${buda-travel.cors.allowed-origins:http://localhost:5173,http://127.0.0.1:5173}")
+    @param:Value("\${buda-travel.cors.allowed-origins:http://localhost:5173,http://127.0.0.1:5173}")
     private val allowedOriginsProperty: String,
 ) : WebMvcConfigurer {
     override fun addCorsMappings(registry: CorsRegistry) {

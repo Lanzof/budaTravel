@@ -12,3 +12,12 @@ spring:
     show-sql: true
   main:
     web-application-type: none
+
+
+budatravel:
+  gtfs:
+    source: ${GTFS_SOURCE:demo}
+    demo:
+      resource: ${GTFS_DEMO_RESOURCE:classpath:gtfs/budapest-mini.zip}
+    local-file:
+      path: ${GTFS_ARCHIVE_PATH:}

@@ -112,17 +112,17 @@ The current route/details sidebar is useful for debugging, but it mixes product 
 ### Story 8.4 — Ingestor profiles and source abstraction
 
 #### Task 8.4.1 — Profile/source configuration
-- [ ] Add `budatravel.gtfs.source` property.
-- [ ] Add `demo` profile using bundled mini archive.
-- [ ] Add local-file source config using `GTFS_ARCHIVE_PATH`.
+- [x] Add `budatravel.gtfs.source` property.
+- [x] Add demo source using bundled mini archive.
+- [x] Add local-file source config using `GTFS_ARCHIVE_PATH`.
 - [ ] Reserve BKK remote config using `BKK_GTFS_URL` and `BKK_API_KEY`.
 
 #### Task 8.4.2 — Archive provider abstraction
-- [ ] Introduce `GtfsArchiveProvider` or equivalent.
-- [ ] Implement classpath/demo provider.
-- [ ] Implement local file provider.
+- [x] Introduce `GtfsArchiveProvider` or equivalent.
+- [x] Implement classpath/demo provider.
+- [x] Implement local file provider.
 - [ ] Keep BKK remote provider as separate later task.
-- [ ] Remove temporary-file workaround once importer accepts `Resource`/stream/archive abstraction.
+- [x] Remove temporary-file workaround once importer accepts `Resource`/stream/archive abstraction.
 
 #### Task 8.4.3 — Scheduled import design
 - [ ] Decide one-shot vs long-running scheduler mode.

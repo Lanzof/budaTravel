@@ -84,10 +84,10 @@
 ## Epic 7 — GTFS import source cleanup
 
 ### Story 7.1 — Archive source abstraction
-- [ ] Introduce a `GtfsArchiveProvider` or equivalent abstraction for GTFS archive sources.
-- [ ] Let ingestion work with Spring `Resource` or `InputStream` instead of requiring a filesystem path.
-- [ ] Support bundled demo archive, mounted local file, and future downloaded BKK archive through one flow.
-- [ ] Remove the temporary-file workaround from `DataInit` after `GtfsService` no longer requires `String zipFilePath`.
+- [x] Introduce a `GtfsArchiveProvider` or equivalent abstraction for GTFS archive sources.
+- [x] Let ingestion work with Spring `Resource` or `InputStream` instead of requiring a filesystem path.
+- [x] Support bundled demo archive and mounted local file through one archive-provider flow; keep future downloaded BKK archive for later.
+- [x] Remove the temporary-file workaround from `DataInit` after `GtfsService` no longer requires `String zipFilePath`.
 
 
 ## Epic 8 — MVP+ usable route demo
@@ -126,10 +126,10 @@
 
 ### Story 8.4 — Ingestor profiles and source abstraction
 - [ ] Add `budatravel.gtfs.source` configuration: demo / local-file / bkk-remote.
-- [ ] Add Spring profile defaults for demo and future BKK import.
-- [ ] Introduce `GtfsArchiveProvider` or equivalent.
-- [ ] Implement bundled demo archive provider.
-- [ ] Implement local file archive provider.
+- [x] Add Spring config defaults for demo and local-file GTFS import.
+- [x] Introduce `GtfsArchiveProvider` or equivalent.
+- [x] Implement bundled demo archive provider.
+- [x] Implement local file archive provider.
 - [ ] Design BKK remote provider with cache/import-if-changed behavior.
 - [ ] Implement scheduled import only after the BKK data source research is complete.
 
