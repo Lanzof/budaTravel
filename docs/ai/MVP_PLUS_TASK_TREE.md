@@ -115,7 +115,7 @@ The current route/details sidebar is useful for debugging, but it mixes product 
 - [x] Add `budatravel.gtfs.source` property.
 - [x] Add demo source using bundled mini archive.
 - [x] Add local-file source config using `GTFS_ARCHIVE_PATH`.
-- [ ] Reserve BKK remote config using `BKK_GTFS_URL` and `BKK_API_KEY`.
+- [x] Reserve BKK remote config using `BKK_GTFS_URL`, `BKK_API_KEY`, and `BKK_GTFS_CACHE_DIR`.
 
 #### Task 8.4.2 — Archive provider abstraction
 - [x] Introduce `GtfsArchiveProvider` or equivalent.
