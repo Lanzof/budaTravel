@@ -343,10 +343,13 @@ export function StopsMap() {
   }
 
   function swapRouteEndpoints(): void {
-    setOrigin(destination)
-    setDestination(origin)
-    setOriginQuery(destination?.name ?? '')
-    setDestinationQuery(origin?.name ?? '')
+    const nextOrigin = destination
+    const nextDestination = origin
+
+    setOrigin(nextOrigin)
+    setDestination(nextDestination)
+    setOriginQuery(nextOrigin?.name ?? '')
+    setDestinationQuery(nextDestination?.name ?? '')
     setRoute(null)
     setRouteError(null)
   }
