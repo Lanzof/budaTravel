@@ -12,4 +12,8 @@ data class ReadinessResponse(
     val locationsCount: Long,
     val connectionsCount: Long,
     val errorMessage: String?,
+    val source: String? = null,
+    val archiveEtag: String? = null,
+    val archiveLastModified: String? = null,
+    val archiveContentLength: Long? = null,
 )

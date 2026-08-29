@@ -27,6 +27,12 @@ services:
       DB_URL: jdbc:postgresql://db:5432/route_finder_db
       DB_USER: route_user
       DB_PASSWORD: route_pass
+      GTFS_SOURCE: ${GTFS_SOURCE:-demo}
+      GTFS_ARCHIVE_PATH: ${GTFS_ARCHIVE_PATH:-}
+      BKK_GTFS_URL: ${BKK_GTFS_URL:-https://go.bkk.hu/api/static/v1/public-gtfs/budapest_gtfs.zip}
+      BKK_GTFS_CACHE_DIR: /data/gtfs-cache
+    volumes:
+      - ./.local/gtfs-cache:/data/gtfs-cache
     depends_on:
       db:
         condition: service_healthy

@@ -117,20 +117,20 @@
 - [x] Move verbose route/GTFS debug metadata behind a collapsible details section.
 
 ### Story 8.3 — BKK API/data source research
-- [ ] Determine whether BKK API returns full archives or incremental data.
-- [ ] Check archive size, update frequency, and required auth.
-- [ ] Check whether BKK responses provide `ETag`, `Last-Modified`, checksum, timestamp, or version metadata.
+- [x] Determine whether BKK API returns full archives or incremental data.
+- [x] Check archive size, update frequency/cache headers, and required auth.
+- [x] Check whether BKK responses provide `ETag`, `Last-Modified`, checksum, timestamp, or version metadata.
 - [ ] Decide active dataset replacement/history policy for BKK imports so old routes do not bloat the database or affect route search.
-- [ ] Document download-cache and import-if-changed strategy.
-- [ ] Decide how API keys are provided locally and in CI/deploy environments.
+- [x] Document download-cache and import-if-changed strategy.
+- [x] Document that static public archive currently works without a key; reserve API-key usage for future FUTÁR/GTFS-RT live layers.
 
 ### Story 8.4 — Ingestor profiles and source abstraction
-- [x] Add `budatravel.gtfs.source` configuration: demo / local-file / bkk-remote.
-- [x] Add Spring config defaults for demo, local-file, and reserved bkk-remote GTFS import.
+- [x] Add `budatravel.gtfs.source` configuration: demo / local-file / bkk-static.
+- [x] Add Spring config defaults for demo, local-file, and reserved bkk-static GTFS import.
 - [x] Introduce `GtfsArchiveProvider` or equivalent.
 - [x] Implement bundled demo archive provider.
 - [x] Implement local file archive provider.
-- [ ] Design and implement BKK remote provider with cache/import-if-changed behavior.
+- [x] Design and implement BKK static provider with cache/import-if-changed behavior.
 - [ ] Implement scheduled import only after the BKK data source research is complete.
 
 ### Story 8.5 — E2E and demo quality
@@ -144,7 +144,7 @@
 
 
 ### Story 8.6 — Next-stage realtime/geocoding experiments
-- [ ] Research BKK GTFS-Realtime / live vehicle positions for a later WebClient/WebFlux + SSE experiment.
+- [ ] Research BKK static GTFS-Realtime / live vehicle positions for a later WebClient/WebFlux + SSE experiment.
 - [ ] Check whether BKK realtime is protobuf-over-HTTP or actual gRPC.
 - [ ] Research OpenStreetMap geocoding options: Nominatim, Photon, Pelias-like services.
 - [ ] Design address/place search -> nearest stop flow for a later stage.

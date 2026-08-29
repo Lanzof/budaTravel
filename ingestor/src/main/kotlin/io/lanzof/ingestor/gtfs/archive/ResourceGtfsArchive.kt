@@ -6,7 +6,10 @@ import java.util.zip.ZipInputStream
 
 class ResourceGtfsArchive(
     private val resource: Resource,
+    override val source: String,
+    override val datasetName: String,
     override val description: String,
+    override val metadata: GtfsArchiveMetadata? = null,
 ) : GtfsArchive {
     override fun openEntry(name: String): InputStream? {
         val zipInputStream = ZipInputStream(resource.inputStream)

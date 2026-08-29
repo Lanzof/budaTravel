@@ -18,7 +18,7 @@ class ReadinessController(
     private val importStatusService: ImportStatusService,
 ) {
     @GetMapping
-    @Operation(summary = "Check whether demo data is imported and API is ready for UI traffic")
+    @Operation(summary = "Check whether imported GTFS data is ready for UI traffic")
     fun readiness(): ResponseEntity<ReadinessResponse> {
         val readiness = importStatusService.getReadiness()
         val status = if (readiness.ready) HttpStatus.OK else HttpStatus.SERVICE_UNAVAILABLE
@@ -34,5 +34,9 @@ class ReadinessController(
         locationsCount = locationsCount,
         connectionsCount = connectionsCount,
         errorMessage = errorMessage,
+        source = source,
+        archiveEtag = archiveEtag,
+        archiveLastModified = archiveLastModified,
+        archiveContentLength = archiveContentLength,
     )
 }

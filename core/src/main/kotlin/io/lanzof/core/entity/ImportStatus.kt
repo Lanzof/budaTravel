@@ -39,6 +39,21 @@ data class ImportStatus(
 
     @Column(name = "error_message")
     var errorMessage: String? = null,
+
+    @Column(name = "source")
+    var source: String? = null,
+
+    @Column(name = "archive_etag")
+    var archiveEtag: String? = null,
+
+    @Column(name = "archive_last_modified")
+    var archiveLastModified: String? = null,
+
+    @Column(name = "archive_content_length")
+    var archiveContentLength: Long? = null,
+
+    @Column(name = "archive_downloaded_at")
+    var archiveDownloadedAt: String? = null,
 )
 
 enum class ImportStatusValue {

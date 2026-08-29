@@ -45,3 +45,6 @@ out/
 ### GTFS data ###
 ingestor/src/main/resources/gtfs/*.zip
 !ingestor/src/main/resources/gtfs/budapest-mini.zip
+
+### Local runtime/cache data ###
+.local/
